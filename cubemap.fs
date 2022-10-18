@@ -1,13 +1,20 @@
 
 precision mediump float;
 
-varying vec3 TexCoords;
+varying vec3 dir;
 uniform samplerCube uSampler;
+
+vec3 adaptDir(vec3 dir)
+{
+	return vec3(dir.x,dir.z,dir.y);
+}
+
+
+
 // ==============================================
 void main(void)
 {
-	vec3 col = vec3(1.0,0.0,0.0) ; 
-	gl_FragColor = textureCube(uSampler, normalize(TexCoords));
+	gl_FragColor = textureCube(uSampler, normalize(adaptDir(dir)));
 }
 
 

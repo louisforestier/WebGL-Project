@@ -1,4 +1,6 @@
-
+/*
+TODO: demander comment toujours garder la skybox en vue
+*/ 
 // =====================================================
 var gl;
 
@@ -27,7 +29,7 @@ class cubemap {
 	}
 
 	initAll() {
-		var size=100.0;
+		var size=50.0;
 		var vertices = [
 			-size/2,-size/2 ,-size/2, 
 			-size/2,-size/2 ,size/2, 
@@ -110,7 +112,6 @@ class cubemap {
 		gl.enableVertexAttribArray(this.shader.vAttrib);
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-		this.shader.samplerUniform = gl.getUniformLocation(this.shader, "uSampler");
 	}
 
 	setShadersParams() {
@@ -119,8 +120,6 @@ class cubemap {
 		gl.enableVertexAttribArray(this.shader.vAttrib);
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-		this.shader.samplerUniform = gl.getUniformLocation(this.shader, "uSampler");
-
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(this.shader.vAttrib, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	}
@@ -130,7 +129,6 @@ class cubemap {
 		mat4.identity(mvMatrix);
 		mat4.translate(mvMatrix, distCENTER);
 		mat4.multiply(mvMatrix, rotMatrix);
-		mat4.rotate(mvMatrix, Math.PI/2, [1, 0, 0]);
 		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
@@ -206,8 +204,6 @@ class objmesh {
 	// --------------------------------------------
 	setShadersParams() {
 		gl.useProgram(this.shader);
-		this.shader.samplerUniform = gl.getUniformLocation(this.shader, "uSampler");
-
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
 		gl.enableVertexAttribArray(this.shader.vAttrib);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
