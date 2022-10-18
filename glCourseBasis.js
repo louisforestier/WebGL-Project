@@ -29,7 +29,7 @@ class cubemap {
 	}
 
 	initAll() {
-		var size=50.0;
+		var size=20.0;
 		var vertices = [
 			-size/2,-size/2 ,-size/2, 
 			-size/2,-size/2 ,size/2, 
