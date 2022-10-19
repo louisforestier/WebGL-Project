@@ -17,12 +17,16 @@ vec3 adaptDir(vec4 dir)
 	return dir.xzy;
 }
 
+float square(float x)
+{
+	return x * x;
+}
+
 float fresnelFactor(vec3 i, vec3 m, float ni)
 {
 	float c = max(0.0,dot(i,m));
 	float g = sqrt(ni*ni+c*c-1.0);
-	float f = 1.0/2.0 * pow(g-c,2.0)/pow(g+c,2.0) * ( 1.0 + (pow(c * (g+c) - 1.0,2.0)/pow(c * (g-c) - 1.0,2.0)));
-	//bad job, does not seem to work -> float f = 1.0/2.0 * ((g - c)*(g-c)/(g+c)*(g+c)) * ( 1.0 + ((c * (g+c) - 1.0)*(c * (g+c) - 1.0))/((c * (g-c) - 1.0)*(c * (g-c) - 1.0)) );
+	float f = 1.0/2.0 * square(g-c)/square(g+c) * ( 1.0 + (square(c * (g+c) - 1.0)/square(c * (g-c) - 1.0)));
 	return f;
 }
 
