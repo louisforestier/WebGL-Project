@@ -3,15 +3,17 @@
     <head>
         <title>WebGL-Project</title>
         <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="main.css" rel="stylesheet" type="text/css">
         <!-- Ajout des différents scripts utile au WebGL -->
         <script type="text/javascript" src="src/glMatrix.js"></script>
         <script type="text/javascript" src="src/callbacks.js"></script>
         <script type="text/javascript" src="src/glCourseBasis.js"></script>
         <script type="text/javascript" src="src/objLoader.js"></script>
+        <script type="text/javascript" src="src/front.js"></script>
     </head>
 
-    <body onload="webGLStart();">
+    <body onload="webGLStart(); readyDocument();">
         <!-- Partie gauche avec WebGL -->
         <article>
             <canvas id="WebGL-test" width="2048" height="1152"></canvas>
@@ -20,6 +22,31 @@
         <!-- Partie droite avec le control sur le WebGL -->
         <aside>
             <h1>C'est notre site web et je test des truc en css !</h1>
+
+            <button class="accordion">Object</button>
+            <div class="panel">
+                <label class="container">One
+                    <input type="radio" checked="checked" name="radio">
+                    <span class="checkmark"></span>
+                </label>
+                <label class="container">Two
+                    <input type="radio" name="radio">
+                    <span class="checkmark"></span>
+                </label>
+                <label class="container">Three
+                    <input type="radio" name="radio">
+                    <span class="checkmark"></span>
+                </label>
+                <label class="container">Four
+                    <input type="radio" name="radio">
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <button class="accordion">Skybox</button>
+            <div class="panel">
+                <p>Lorem ipsum...</p>
+            </div>
         </aside>
     </body>
 </html>
