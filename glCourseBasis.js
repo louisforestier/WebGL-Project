@@ -20,8 +20,9 @@ var CUBEMAP = null;
 // =====================================================
 
 class cubemap {
-	constructor() {
+	constructor(name) {
 		this.shaderName='cubemap';
+        this.skyboxName = name;
 		this.loaded=-1;
 		this.shader = null;
 		this.initAll();
@@ -79,12 +80,12 @@ class cubemap {
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		var cubemapInfo =[
-			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"right.jpg"} ,
-			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"left.jpg"} ,
-			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Y, src:"top.jpg"},
-			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, src:"bottom.jpg"},
-			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Z, src:"front.jpg"},
-			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, src:"back.jpg"} 
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"./skyboxes/" + this.skyboxName + "/right.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"./skyboxes/" + this.skyboxName + "/left.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Y, src:"./skyboxes/" + this.skyboxName + "/top.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, src:"./skyboxes/" + this.skyboxName + "/bottom.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Z, src:"./skyboxes/" + this.skyboxName + "/front.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, src:"./skyboxes/" + this.skyboxName + "/back.jpg"} 
 		];
 
 		var cubemap_image = [];
@@ -368,7 +369,7 @@ loadObjFile = function(OBJ3D)
 
 
 
-	xhttp.open("GET", OBJ3D.objName, true);
+	xhttp.open("GET", "./objects/" + OBJ3D.objName, true);
 	xhttp.send();
 }
 
@@ -397,7 +398,7 @@ function loadShaderText(Obj3D,ext) {   // lecture asynchrone...
   }
   
   Obj3D.loaded = 0;
-  xhttp.open("GET", Obj3D.shaderName+ext, true);
+  xhttp.open("GET", "./shaders/" + Obj3D.shaderName + ext, true);
   xhttp.send();
 }
 
@@ -433,7 +434,6 @@ function compileShaders(Obj3D)
 
 // =====================================================
 function webGLStart() {
-	
 	var canvas = document.getElementById("WebGL-test");
 
 	canvas.onmousedown = handleMouseDown;
@@ -455,7 +455,7 @@ function webGLStart() {
 	OBJ1 = new objmesh('sphere.obj');
 	//OBJ2 = new objmesh('porsche.obj');
 	
-	CUBEMAP = new cubemap();
+	CUBEMAP = new cubemap('lake');
 
 	tick();
 }
