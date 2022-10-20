@@ -1,4 +1,4 @@
-function readyDocument(){
+function readyDocument() {
     var acc = document.getElementsByClassName("accordion");
     var i;
 
@@ -14,11 +14,8 @@ function readyDocument(){
         });
     }
 
-    acc = document.getElementsByName("radio");
-
-    for(i = 0; i < acc.length; i++){
-        acc[i].addEventListener("click", function() {
-            OBJ1 = new objmesh(this.value);
-        });
-    }
+    acc = document.getElementById("objectChoice");
+    acc.addEventListener("click", function() {
+        OBJ1 = new objmesh(this.value);
+    });
 }

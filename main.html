@@ -26,26 +26,12 @@
             <button class="accordion">Object</button>
             <div class="panel">
                 <h3>Choix de l'objet</h3>
-                <label class="container">
-                    Sphere
-                    <input type="radio" checked="checked" name="radio" value="sphere.obj">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="container">
-                    Bunny
-                    <input type="radio" name="radio" value="bunny.obj">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="container">
-                    Porsche
-                    <input type="radio" name="radio" value="porsche.obj">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="container">
-                    Mustang
-                    <input type="radio" name="radio" value="mustang.obj">
-                    <span class="checkmark"></span>
-                </label>
+                <select id="objectChoice" name="objectChoice" value="Sphere">
+                    <option value="sphere.obj" selected="true">Sphere</option>
+                    <option value="bunny.obj">Bunny</option>
+                    <option value="porsche.obj">Porsche</option>
+                    <option value="mustang.obj">Mustang</option>
+                </select>
             </div>
 
             <button class="accordion">Skybox</button>
