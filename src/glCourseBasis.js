@@ -241,8 +241,6 @@ class objmesh {
 	}
 }
 
-
-
 // =====================================================
 // PLAN 3D, Support géométrique
 // =====================================================
@@ -327,12 +325,9 @@ class plane {
 
 }
 
-
 // =====================================================
 // FONCTIONS GENERALES, INITIALISATIONS
 // =====================================================
-
-
 
 // =====================================================
 function initGL(canvas)
@@ -353,7 +348,6 @@ function initGL(canvas)
 	}
 }
 
-
 // =====================================================
 loadObjFile = function(OBJ3D)
 {
@@ -372,8 +366,6 @@ loadObjFile = function(OBJ3D)
 	xhttp.open("GET", "./objects/" + OBJ3D.objName, true);
 	xhttp.send();
 }
-
-
 
 // =====================================================
 function loadShaders(Obj3D) {
@@ -430,7 +422,6 @@ function compileShaders(Obj3D)
 		console.log(gl.getShaderInfoLog(Obj3D.shader));
 	}
 }
-
 
 // =====================================================
 function webGLStart() {
