@@ -4,7 +4,6 @@ function readyDocument(){
 
     for(i = 0; i < acc.length; i++){
         acc[i].addEventListener("click", function() {
-            console.log("j'ai clické !")
             this.classList.toggle("active");
             var panel = this.nextElementSibling;
             if (panel.style.maxHeight) {
@@ -12,6 +11,14 @@ function readyDocument(){
             } else {
                 panel.style.maxHeight = panel.scrollHeight + "px";
             } 
+        });
+    }
+
+    acc = document.getElementsByName("radio");
+
+    for(i = 0; i < acc.length; i++){
+        acc[i].addEventListener("click", function() {
+            OBJ1 = new objmesh(this.value);
         });
     }
 }
