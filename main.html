@@ -3,6 +3,7 @@
     <head>
         <title>WebGL-Project</title>
         <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+        <link href="main.css" rel="stylesheet" type="text/css">
         <!-- Ajout des différents scripts utile au WebGL -->
         <script type="text/javascript" src="src/glMatrix.js"></script>
         <script type="text/javascript" src="src/callbacks.js"></script>
@@ -11,9 +12,14 @@
     </head>
 
     <body onload="webGLStart();">
-        <!-- Corps de la page -->
-        <div>
-            <canvas id="WebGL-test" style="border:none;" width="800" height="600"></canvas>
-        </div>
+        <!-- Partie gauche avec WebGL -->
+        <article>
+            <canvas id="WebGL-test" width="2048" height="1152"></canvas>
+        </article>
+        
+        <!-- Partie droite avec le control sur le WebGL -->
+        <aside>
+            <h1>C'est notre site web et je test des truc en css !</h1>
+        </aside>
     </body>
 </html>
