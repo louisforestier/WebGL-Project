@@ -25,11 +25,11 @@ function readyDocument() {
     acc.addEventListener("click", function() {
         OBJ1.shaderState = this.value;
         var slider = this.nextElementSibling;
-        if(this.value != 2){
-            slider.classList.add("hidden");
+        if(this.value == 2 || this.value == 1){
+            slider.classList.remove("hidden");
         }
         else {
-            slider.classList.remove("hidden");
+            slider.classList.add("hidden");
         }
     });
 
