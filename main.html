@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>WebGL-Project</title>
-        <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="main.css" rel="stylesheet" type="text/css">
         <!-- Ajout des différents scripts utile au WebGL -->
@@ -21,7 +21,7 @@
         
         <!-- Partie droite avec le control sur le WebGL -->
         <aside>
-            <h1>C'est notre site web et je test des truc en css !</h1>
+            <h1>Projet WebGL - DORET & FORESTIER</h1>
 
             <button class="accordion">Object</button>
             <div class="panel">
@@ -36,10 +36,10 @@
                 </select>
                 <h4>Choix du shader</h4>
                 <select id="shaderChoice" name="shaderChoice" value="Fresnel">
-                    <option value="666">Classic</option>
-                    <option value="0" selected="true">Fresnel</option>
-                    <option value="1">Reflexion</option>
-                    <option value="2">Refraction</option>
+                    <option value="3">Classic</option>
+                    <option value="2" selected="true">Fresnel</option>
+                    <option value="0">Reflexion</option>
+                    <option value="1">Refraction</option>
                 </select>
                 <div class="slidecontainer">
                     <input type="range" min="1" max="4.1" step="0.01" value="1.52" class="slider" id="refractIndex">
@@ -59,6 +59,19 @@
                     <option value="blue_space">Blue Space</option>
                     <option value="test">Test</option>
                 </select>
+                <input type="checkbox" id="weirdSkybox" name="weirdSkybox">
+                <label for="weirdSkybox">Weird Skybox</label>
+                <div id="secondSkybox" class="hidden">
+                    <h4>Choix de la skybox reflété</h4>
+                    <select id="skyboxChoice" name="skyboxChoice" value="Lake">
+                        <option value="lake" selected="true">Lake</option>
+                        <option value="room">Hall</option>
+                        <option value="snowy_mountain">Snowy Mountains</option>
+                        <option value="red_space">Red Space</option>
+                        <option value="blue_space">Blue Space</option>
+                        <option value="test">Test</option>
+                    </select>
+                <div>
             </div>
         </aside>
     </body>

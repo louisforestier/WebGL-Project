@@ -21,9 +21,32 @@ function readyDocument() {
         OBJ1 = new objmesh(this.value);
     });
 
+    acc = document.getElementById("shaderChoice");
+    acc.addEventListener("click", function() {
+        OBJ1.shaderState = this.value;
+        var slider = this.nextElementSibling;
+        if(this.value != 2){
+            slider.classList.add("hidden");
+        }
+        else {
+            slider.classList.remove("hidden");
+        }
+    });
+
+    acc = document.getElementById("weirdSkybox");
+    acc.addEventListener("click", function() {
+        var weird = document.getElementById("secondSkybox");
+        weird.classList.toggle("hidden");
+    });
+
     acc = document.getElementById("skyboxChoice");
     acc.addEventListener("click", function() {
         CUBEMAP = new cubemap(this.value);
+    });
+
+    acc = document.getElementById("secondSkybox");
+    acc.addEventListener("click", function() {
+        // Choix a faire pour la texture de la skybox modifié
     });
 
     output.value = slider.value;
