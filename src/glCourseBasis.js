@@ -15,6 +15,13 @@ var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
 
+const ShaderState = {
+	Reflect:0,
+	Refract:1,
+	Fresnel:2,
+	Color:3
+};
+
 // =====================================================
 // CUBEMAP
 // =====================================================
@@ -165,6 +172,7 @@ class objmesh {
 		this.shader = null;
 		this.mesh = null;
 		this.refractIndex = 1.52;
+		this.shaderState = ShaderState.Fresnel;
 		
 		loadObjFile(this);
 		loadShaders(this);
@@ -219,6 +227,9 @@ class objmesh {
 		
 		this.shader.refractIndex = gl.getUniformLocation(this.shader, "uRefractIndex");
 		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
+		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
+		gl.uniform1i(this.shader.shaderState,this.shaderState);
+		console.log(this.shaderState);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
