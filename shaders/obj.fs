@@ -31,10 +31,21 @@ float square(float x)
 
 float fresnelFactor(vec3 i, vec3 m, float ni)
 {
-	float c = max(0.0,dot(i,m));
+	float c = abs(dot(i,m));
 	float g = sqrt(ni*ni+c*c-1.0);
-	float f = 1.0/2.0 * square(g-c)/square(g+c) * ( 1.0 + (square(c * (g+c) - 1.0)/square(c * (g-c) - 1.0)));
+	float f = 0.5 * square(g-c)/square(g+c) * ( 1.0 + (square(c * (g+c) - 1.0)/square(c * (g-c) + 1.0)));
 	return f;
+}
+
+float fresnelFactor(float ni, float m) {
+    float c = abs(m);
+    float g = sqrt((ni * ni) + (c * c) - 1.0);
+
+    float gmc = g - c;
+    float gpc = g + c;
+    float sub_1 = c * gpc + 1.0;
+    float sub_2 = c * gmc + 1.0;
+    return 0.5 * ((gmc * gmc)/(gpc * gpc)) * (1.0 + ((sub_1 * sub_1)/(sub_2 * sub_2)));
 }
 
 
@@ -96,7 +107,7 @@ void main(void)
 	}
 	else 
 	{
-		vec3 color = vec3(0.8,0.4,0.4) * dot(N,normalize(vec3(-pos3D))); // Lambert rendering, eye light source
+		vec3 color = vec3(0.8,0.4,0.4) * dot(normalize(N),normalize(vec3(-pos3D))); // Lambert rendering, eye light source
 		col= vec4(color,1.0);
 	}
 	gl_FragColor = col;

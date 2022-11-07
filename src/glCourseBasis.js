@@ -140,7 +140,6 @@ class cubemap {
 	// --------------------------------------------
 	setMatrixUniforms() {
 		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
 		mat4.multiply(mvMatrix, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
@@ -229,7 +228,6 @@ class objmesh {
 		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
-		console.log(this.shaderState);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
