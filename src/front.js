@@ -1,5 +1,7 @@
 function readyDocument() {
     var acc = document.getElementsByClassName("accordion");
+    var slider = document.getElementById("refractIndex");
+    var output = document.getElementById("value");
     var i;
 
     for(i = 0; i < acc.length; i++){
@@ -18,4 +20,14 @@ function readyDocument() {
     acc.addEventListener("click", function() {
         OBJ1 = new objmesh(this.value);
     });
+
+    output.value = slider.value;
+
+    slider.oninput = function() {
+        output.value = this.value;
+    }
+
+    output.oninput = function() {
+        slider.value = this.value;
+    }
 }

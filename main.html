@@ -25,13 +25,25 @@
 
             <button class="accordion">Object</button>
             <div class="panel">
-                <h3>Choix de l'objet</h3>
+                <h3>Paramètre de l'objet</h3>
+                <h4>Choix de l'objet</h4>
                 <select id="objectChoice" name="objectChoice" value="Sphere">
                     <option value="sphere.obj" selected="true">Sphere</option>
                     <option value="bunny.obj">Bunny</option>
                     <option value="porsche.obj">Porsche</option>
                     <option value="mustang.obj">Mustang</option>
+                    <option value="duck.obj">Duck</option>
                 </select>
+                <h4>Choix du shader</h4>
+                <select id="shaderChoice" name="shaderChoice" value="Fresnel">
+                    <option value="1" selected="true">Fersnel</option>
+                    <option value="2">Reflexion</option>
+                    <option value="3">Refraction</option>
+                </select>
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="4.1" step="0.01" value="1.52" class="slider" id="refractIndex">
+                    <input type="number" min="1" max="4.1" step="0.01" class="sliderVal" id="value">
+                </div>
             </div>
 
             <button class="accordion">Skybox</button>
