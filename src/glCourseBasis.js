@@ -164,6 +164,7 @@ class objmesh {
 		this.loaded = -1;
 		this.shader = null;
 		this.mesh = null;
+		this.refractIndex = 1.52;
 		
 		loadObjFile(this);
 		loadShaders(this);
@@ -215,7 +216,9 @@ class objmesh {
 		gl.enableVertexAttribArray(this.shader.nAttrib);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
 		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
+		
+		this.shader.refractIndex = gl.getUniformLocation(this.shader, "uRefractIndex");
+		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");

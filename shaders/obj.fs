@@ -6,6 +6,9 @@ varying vec3 N;
 varying mat4 invRotMatrix;
 
 uniform samplerCube uSampler;
+uniform float uRefractIndex;
+
+#define AIR_REFRACT_INDEX 1.0
 
 vec3 adaptDir(vec3 dir)
 {
@@ -79,5 +82,5 @@ void main(void)
 	//gl_FragColor = refractSkybox(pos3D.xyz, normalize(N),invRotMatrix,1.0,1.52);
 	
 	//gl_FragColor = reflectSkybox(pos3D.xyz, normalize(N),invRotMatrix);
-	gl_FragColor = fresnelEffect(pos3D.xyz, normalize(N),invRotMatrix,1.0,1.52);
+	gl_FragColor = fresnelEffect(pos3D.xyz, normalize(N),invRotMatrix,AIR_REFRACT_INDEX,uRefractIndex);
 }
