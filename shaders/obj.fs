@@ -37,17 +37,6 @@ float fresnelFactor(vec3 i, vec3 m, float ni)
 	return f;
 }
 
-float fresnelFactor(float ni, float m) {
-    float c = abs(m);
-    float g = sqrt((ni * ni) + (c * c) - 1.0);
-
-    float gmc = g - c;
-    float gpc = g + c;
-    float sub_1 = c * gpc + 1.0;
-    float sub_2 = c * gmc + 1.0;
-    return 0.5 * ((gmc * gmc)/(gpc * gpc)) * (1.0 + ((sub_1 * sub_1)/(sub_2 * sub_2)));
-}
-
 
 vec4 refractSkybox(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float ind2)
 {
