@@ -25,9 +25,11 @@ function readyDocument() {
 
     slider.oninput = function() {
         output.value = this.value;
+        OBJ1.refractIndex = this.value;
     }
 
     output.oninput = function() {
         slider.value = this.value;
+        OBJ1.refractIndex = this.value;
     }
 }
