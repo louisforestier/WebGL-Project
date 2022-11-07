@@ -36,9 +36,10 @@
                 </select>
                 <h4>Choix du shader</h4>
                 <select id="shaderChoice" name="shaderChoice" value="Fresnel">
-                    <option value="1" selected="true">Fresnel</option>
-                    <option value="2">Reflexion</option>
-                    <option value="3">Refraction</option>
+                    <option value="666">Classic</option>
+                    <option value="0" selected="true">Fresnel</option>
+                    <option value="1">Reflexion</option>
+                    <option value="2">Refraction</option>
                 </select>
                 <div class="slidecontainer">
                     <input type="range" min="1" max="4.1" step="0.01" value="1.52" class="slider" id="refractIndex">
@@ -48,7 +49,16 @@
 
             <button class="accordion">Skybox</button>
             <div class="panel">
-                <p>Lorem ipsum...</p>
+                <h3>Paramètre de la skybox</h3>
+                <h4>Choix du fond</h4>
+                <select id="skyboxChoice" name="skyboxChoice" value="Lake">
+                    <option value="lake" selected="true">Lake</option>
+                    <option value="room">Hall</option>
+                    <option value="snowy_mountain">Snowy Mountains</option>
+                    <option value="red_space">Red Space</option>
+                    <option value="blue_space">Blue Space</option>
+                    <option value="test">Test</option>
+                </select>
             </div>
         </aside>
     </body>

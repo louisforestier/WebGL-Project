@@ -21,6 +21,11 @@ function readyDocument() {
         OBJ1 = new objmesh(this.value);
     });
 
+    acc = document.getElementById("skyboxChoice");
+    acc.addEventListener("click", function() {
+        CUBEMAP = new cubemap(this.value);
+    });
+
     output.value = slider.value;
 
     slider.oninput = function() {
