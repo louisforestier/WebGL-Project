@@ -13,6 +13,7 @@ uniform int uShaderState;
 #define REFLECT 0
 #define REFRACT 1
 #define FRESNEL 2
+#define COOKTORRANCE 4
 
 #define PI 3.1415926538
 
@@ -97,14 +98,14 @@ vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 // ======================================================================
 
 // Fonction calculant la distribution de Beckmann
-float beckmann(vec3 i, vec3 m, float sigma)
+float beckmann(vec3 n, vec3 m, float sigma)
 {
-	float cosinus = dot(i,m);
+	float cosinus = dot(n,m);
 	float denominateur = PI * square(sigma) *square(square(cosinus));
 	float sinus = sqrt(1.0 - square(cosinus));
 	float tangente = sinus / cosinus;
 	float exposant = -(square(tangente))/(2.0*square(sigma));
-	return 1.0 / denominateur * exp(exposant);
+	return exp(exposant) / denominateur ;
 }
 
 // Fonction calculant l'ombrage et le Masquage
@@ -116,6 +117,35 @@ float g(vec3 n, vec3 m, vec3 i, vec3 o)
 	float denom2 = dot(i, m);
 	return min(1., min(num1/denom1, num2/denom2));
 }
+
+// avec 0,0,0 comme position d'une source lumineuse
+vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float ind2, float sigma)
+{
+	vec3 Vo = normalize(-pos);
+	vec3 i = Vo;
+	vec3 m = normalize(i+Vo);
+
+	float F = fresnelFactor(i,m,ind2);
+	float D = beckmann(normal,m,sigma);
+	float G = g(normal,m,i,Vo);
+	float fs = (F * D * G) / (PI * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
+
+	vec3 Kd = vec3(1.0, 0.0, 0.0);
+	vec3 Ks = vec3(1.0, 1.0, 1.0);
+	float Li = 2.0;
+	vec3 color = Li * ((Kd / PI) * (1.0 - F) +  Ks * fs) * dot(normal,i);
+	vec4 Vi = vec4(reflect(-Vo,normal),1.0);
+	Vi = invRotMatrix * Vi;
+	vec3 mColor = textureCube(uSampler,adaptDir(Vi)).rgb;
+
+	vec4 Vt = vec4(refract(-Vo,normal,ind1/ind2),1.0);
+	Vt = invRotMatrix * Vt;
+
+	vec3 tColor = textureCube(uSampler,adaptDir(Vt)).rgb;
+
+	return vec4(color * (F * mColor + (1.0-F) * tColor),1.0);
+}
+
 
 // ======================================================================
 // Main du Shader
@@ -129,11 +159,15 @@ void main(void)
 	}
 	else if(uShaderState == REFRACT)
 	{
-		col = refractSkybox(pos3D.xyz, normalize(N),invRotMatrix,1.0,1.52);
+		col = refractSkybox(pos3D.xyz, normalize(N),invRotMatrix,AIR_REFRACT_INDEX,uRefractIndex);
 	}
 	else if(uShaderState == FRESNEL)
 	{
 		col = fresnelEffect(pos3D.xyz, normalize(N),invRotMatrix,AIR_REFRACT_INDEX,uRefractIndex);
+	}
+	else if(uShaderState == COOKTORRANCE)
+	{
+		col = cookTorrance(pos3D.xyz, normalize(N), invRotMatrix,AIR_REFRACT_INDEX,uRefractIndex,0.1);
 	}
 	else 
 	{

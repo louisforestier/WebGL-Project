@@ -19,7 +19,8 @@ const ShaderState = {
 	Reflect:0,
 	Refract:1,
 	Fresnel:2,
-	Color:3
+	Color:3,
+	CookTorrance:4
 };
 
 // =====================================================
