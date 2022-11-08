@@ -32,6 +32,29 @@ h4{
     text-align: start;
 }
 
+dt{
+    align-items: center;
+}
+
+.squareColorPicker{
+    appearance: none;
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.squareColorPicker::-webkit-color-swatch {
+    border-radius: 10px;
+    border: 2px solid #000000;
+}
+
+.squareColorPicker::-moz-color-swatch {
+    border-radius: 10px;
+    border: 2px solid #000000;
+}
+
 .accordion {
     background-color: #eee;
     color: #444;
@@ -50,7 +73,7 @@ h4{
 }
 
 .panel {
-    padding: 10px 10px;
+    padding: 10px;
     background-color: white;
     max-height: 0;
     overflow: hidden;
