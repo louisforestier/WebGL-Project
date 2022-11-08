@@ -14,6 +14,8 @@ uniform int uShaderState;
 #define REFRACT 1
 #define FRESNEL 2
 
+#define PI 3.1415926538
+
 vec3 adaptDir(vec3 dir)
 {
 	return dir.xzy;
@@ -74,6 +76,16 @@ vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 	vec4 tColor = vec4(textureCube(uSampler,adaptDir(Vt)).rgb,1.0);
 
 	return f * mColor + (1.0-f) * tColor;
+}
+
+float beckmann(vec3 i, vec3 m, float sigma)
+{
+	float cosinus = dot(i,m);
+	float denominateur = PI * square(sigma) *square(square(cosinus));
+	float sinus = sqrt(1.0 - square(cosinus));
+	float tangente = sinus / cosinus;
+	float exposant = -(square(tangente))/(2.0*square(sigma));
+	return 1.0 / denominateur * exp(exposant);
 }
 
 
