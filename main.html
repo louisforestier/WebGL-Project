@@ -23,9 +23,8 @@
         <aside>
             <h1>Projet WebGL - DORET & FORESTIER</h1>
 
-            <button class="accordion">Object</button>
+            <button class="accordion">Paramètres de l'objet</button>
             <div class="panel">
-                <h3>Paramètre de l'objet</h3>
                 <h4>Choix de l'objet</h4>
                 <select id="objectChoice" name="objectChoice" value="Sphere">
                     <option value="sphere.obj" selected="true">Sphere</option>
@@ -34,6 +33,17 @@
                     <option value="mustang.obj">Mustang</option>
                     <option value="duck.obj">Duck</option>
                 </select>
+                <h4>Choix de la couleur</h4>
+                <dl>
+                    <dt>
+                        <input class="squareColorPicker" type="color" id="colDiff" name="diff" value="#cc6666">
+                        <label for="diff">Couleur diffuse</label>
+                    </dt>
+                    <dt>
+                        <input class="squareColorPicker" type="color" id="colSpec" name="spec" value="#ffffff">
+                        <label for="spec">Couleur Spéculaire</label>
+                    </dt>
+                </dl>
                 <h4>Choix du shader</h4>
                 <select id="shaderChoice" name="shaderChoice" value="Fresnel">
                     <option value="3">Classic</option>
@@ -48,9 +58,8 @@
                 </div>
             </div>
 
-            <button class="accordion">Skybox</button>
+            <button class="accordion">Paramètres de la skybox</button>
             <div class="panel">
-                <h3>Paramètre de la skybox</h3>
                 <h4>Choix du fond</h4>
                 <select id="skyboxChoice" name="skyboxChoice" value="Lake">
                     <option value="lake" selected="true">Lake</option>
