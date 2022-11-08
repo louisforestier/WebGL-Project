@@ -15,20 +15,31 @@ var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
 
+const ShaderState = {
+	Reflect:0,
+	Refract:1,
+	Fresnel:2,
+	Color:3
+};
+
 // =====================================================
 // CUBEMAP
 // =====================================================
 
 class cubemap {
+
+	// --------------------------------------------
 	constructor(name) {
 		this.shaderName='cubemap';
-        this.skyboxName = name;
 		this.loaded=-1;
 		this.shader = null;
+		this.texture = 0;
 		this.initAll();
-		
+		if(name != null)
+			this.setTexture(name);
 	}
 
+	// --------------------------------------------
 	initAll() {
 		var size=20.0;
 		var vertices = [
@@ -71,10 +82,20 @@ class cubemap {
 		this.indexBuffer.numItems = indices.length;
 	
 		loadShaders(this);
-		//this.initShaders();
-		this.initTextures();
 	}
 
+	setTexture(skyboxName)
+	{
+		if( skyboxName != null)
+		{
+			if(this.texture != 0)
+				gl.deleteTexture(this.texture);
+			this.skyboxName = skyboxName;
+			this.initTextures();
+		}
+	}
+
+	// --------------------------------------------
 	initTextures()
 	{
 		this.texture = gl.createTexture();
@@ -107,6 +128,7 @@ class cubemap {
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 
+	// --------------------------------------------
 	initShaders(){
 		gl.useProgram(this.shader);
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
@@ -115,8 +137,10 @@ class cubemap {
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 	}
 
+	// --------------------------------------------
 	setShadersParams() {
 		gl.useProgram(this.shader);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
 		gl.enableVertexAttribArray(this.shader.vAttrib);
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
@@ -128,14 +152,13 @@ class cubemap {
 	// --------------------------------------------
 	setMatrixUniforms() {
 		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
 		mat4.multiply(mvMatrix, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
 	}
 
-
+	// --------------------------------------------
 	draw() {
 		if(this.shader && this.loaded==4) {
 			this.setShadersParams();
@@ -144,8 +167,6 @@ class cubemap {
 			gl.drawElements(gl.TRIANGLES, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		}
 	}
-
-
 }
 
 // =====================================================
@@ -158,41 +179,54 @@ class objmesh {
 	constructor(objFname) {
 		this.objName = objFname;
 		this.shaderName = 'obj';
+		this.skyboxName = 'lake';
 		this.loaded = -1;
 		this.shader = null;
 		this.mesh = null;
-		
+		this.refractIndex = 1.52;
+		this.shaderState = ShaderState.Fresnel;
+		this.texture = 0;
 		loadObjFile(this);
 		loadShaders(this);
+		this.initTextures();
 	}
 
+	setTexture(textureName)
+	{
+		if( textureName != null)
+		{
+			if(this.texture != 0)
+				gl.deleteTexture(this.texture);
+			this.skyboxName = textureName;
+			this.initTextures();
+		}
+	}
+
+	// --------------------------------------------
 	initTextures()
 	{
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		var cubemapInfo =[
-			gl.TEXTURE_CUBE_MAP_POSITIVE_X ,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_X ,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Y ,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Z 
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"./skyboxes/" + this.skyboxName + "/right.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"./skyboxes/" + this.skyboxName + "/left.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Y, src:"./skyboxes/" + this.skyboxName + "/top.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, src:"./skyboxes/" + this.skyboxName + "/bottom.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Z, src:"./skyboxes/" + this.skyboxName + "/front.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, src:"./skyboxes/" + this.skyboxName + "/back.jpg"} 
 		];
 
-		var width, height, nrChannels;
+		var cubemap_image = [];
 
+		var self = this;
 		for (let i = 0; i < cubemapInfo.length; i++) {
-			const element = cubemapInfo[i];
-			var texImage = new Image();
-			texImage.src = "test.jpg";
-	
-			this.texture.image = texImage;
-			var self = this;
-			texImage.onload = function () {
-				gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-				gl.texImage2D(element, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, self.texture.image);
-				gl.activeTexture(gl.TEXTURE0);
-			}
+			const {target,src} = cubemapInfo[i];
+			cubemap_image[i] = new Image();
+			cubemap_image[i].src = cubemapInfo[i].src;
+			cubemap_image[i].onload = function () {
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.texture);
+				gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubemap_image[i]);
+			}	
 		}
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -200,7 +234,6 @@ class objmesh {
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
-
 
 	// --------------------------------------------
 	setShadersParams() {
@@ -214,7 +247,12 @@ class objmesh {
 		gl.enableVertexAttribArray(this.shader.nAttrib);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
 		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
+		
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		this.shader.refractIndex = gl.getUniformLocation(this.shader, "uRefractIndex");
+		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
+		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
+		gl.uniform1i(this.shader.shaderState,this.shaderState);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
@@ -259,10 +297,10 @@ class plane {
 	initAll() {
 		var size=1.0;
 		var vertices = [
-			-size, -size, 0.1,
-			 size, -size, 0.1,
-			 size, size, 0.1,
-			-size, size, 0.1
+			-size, -size, 0,
+			 size, -size, 0,
+			 size, size, 0,
+			-size, size, 0
 		];
 
 		var texcoords = [
@@ -286,7 +324,6 @@ class plane {
 
 		loadShaders(this);
 	}
-	
 	
 	// --------------------------------------------
 	setShadersParams() {
@@ -322,7 +359,6 @@ class plane {
 			gl.drawArrays(gl.LINE_LOOP, 0, this.vBuffer.numItems);
 		}
 	}
-
 }
 
 // =====================================================
@@ -442,10 +478,7 @@ function webGLStart() {
 	distCENTER = vec3.create([0,-0.2,-3]);
 	
 	PLANE = new plane();
-
 	OBJ1 = new objmesh('sphere.obj');
-	//OBJ2 = new objmesh('porsche.obj');
-	
 	CUBEMAP = new cubemap('lake');
 
 	tick();
@@ -454,10 +487,10 @@ function webGLStart() {
 // =====================================================
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
+	
+	// Drawing objects
 	PLANE.draw();
-
 	OBJ1.draw();
-	//OBJ2.draw();
 	CUBEMAP.draw();
 }
 
