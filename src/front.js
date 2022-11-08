@@ -1,7 +1,5 @@
 function readyDocument() {
     var acc = document.getElementsByClassName("accordion");
-    var slider = document.getElementById("refractIndex");
-    var output = document.getElementById("value");
     var i;
 
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
@@ -28,12 +26,19 @@ function readyDocument() {
     acc = document.getElementById("shaderChoice");
     acc.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
-        var slider = this.nextElementSibling;
+        var sliderRef = this.nextElementSibling;
+        var sliderReg = this.nextElementSibling.nextElementSibling;
         if(this.value == 2 || this.value == 1 || this.value == 4){
-            slider.classList.remove("hidden");
+            sliderRef.classList.remove("hidden");
         }
         else {
-            slider.classList.add("hidden");
+            sliderRef.classList.add("hidden");
+        }
+        if(this.value == 4){
+            sliderReg.classList.remove("hidden");
+        }
+        else {
+            sliderReg.classList.add("hidden");
         }
     });
 
@@ -88,18 +93,41 @@ function readyDocument() {
         OBJ1.setTexture(this.value);
     });
 
+    // Récupération du slider et de l'input number de l'indice de réfraction
+    var sliderRef = document.getElementById("refractIndex");
+    var outputRef = document.getElementById("valueRef");
+
     // Affecte au champ nombre la valeur du slider
-    output.value = slider.value;
+    outputRef.value = sliderRef.value;
 
     // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
-    slider.oninput = function() {
-        output.value = this.value;
+    sliderRef.oninput = function() {
+        outputRef.value = this.value;
         OBJ1.refractIndex = this.value;
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
-    output.oninput = function() {
-        slider.value = this.value;
+    outputRef.oninput = function() {
+        sliderRef.value = this.value;
         OBJ1.refractIndex = this.value;
+    }
+
+    // Récupération du slider et de l'input number de la rugosité
+    var sliderReg = document.getElementById("rugosity");
+    var outputReg = document.getElementById("valueReg");
+
+    // Affecte au champ nombre la valeur du slider
+    outputReg.value = sliderReg.value;
+
+    // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
+    sliderReg.oninput = function() {
+        outputReg.value = this.value;
+        // A faire : mettre à jour la rugosité
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    outputReg.oninput = function() {
+        sliderReg.value = this.value;
+        // A faire : mettre à jour la rugosité
     }
 }
