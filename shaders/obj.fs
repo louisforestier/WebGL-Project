@@ -16,21 +16,33 @@ uniform int uShaderState;
 
 #define PI 3.1415926538
 
+// ======================================================================
+// Fonction générales
+// ======================================================================
+
+// Adapte la direction selon notre origine
 vec3 adaptDir(vec3 dir)
 {
 	return dir.xzy;
 }
 
+// Adapte la direction selon notre origine
 vec3 adaptDir(vec4 dir)
 {
 	return dir.xzy;
 }
 
+// Met un flottant au carré
 float square(float x)
 {
 	return x * x;
 }
 
+// ======================================================================
+// Jalon 1 : Skybox, Mirroir, Transparence et Fresnel
+// ======================================================================
+
+// Calcul le facteur de fresnel
 float fresnelFactor(vec3 i, vec3 m, float ni)
 {
 	float c = abs(dot(i,m));
@@ -39,7 +51,7 @@ float fresnelFactor(vec3 i, vec3 m, float ni)
 	return f;
 }
 
-
+// Fait une refraction de la skybox, c'est la fonction principale de la transparance
 vec4 refractSkybox(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float ind2)
 {
 	vec3 Vo = normalize(pos);
@@ -49,6 +61,7 @@ vec4 refractSkybox(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 	return vec4(textureCube(uSampler,adaptDir(Vt)).rgb,1.0);
 }
 
+// Fait une reflection de la skybox, c'est la fonction principale du Mirroir parfait
 vec4 reflectSkybox(vec3 pos, vec3 normal, mat4 invRotMatrix)
 {
 	vec3 Vo = normalize(pos);
@@ -58,8 +71,8 @@ vec4 reflectSkybox(vec3 pos, vec3 normal, mat4 invRotMatrix)
 	return vec4(textureCube(uSampler,adaptDir(Vi)).rgb,1.0);
 }
 
-
-
+// Fait une refraction, une reflection et le multiplie par le facteur de fresnel, 
+// C'est la fonction principale de l'affichage fresnel
 vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float ind2)
 {
 	vec3 Vo = normalize(pos);
@@ -78,6 +91,12 @@ vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 	return f * mColor + (1.0-f) * tColor;
 }
 
+
+// ======================================================================
+// Jalon 2 : Cook & Torrence
+// ======================================================================
+
+// Fonction calculant la distribution de Beckmann
 float beckmann(vec3 i, vec3 m, float sigma)
 {
 	float cosinus = dot(i,m);
@@ -88,9 +107,19 @@ float beckmann(vec3 i, vec3 m, float sigma)
 	return 1.0 / denominateur * exp(exposant);
 }
 
+// Fonction calculant l'ombrage et le Masquage
+float g(vec3 n, vec3 m, vec3 i, vec3 o)
+{
+	float num1 = 2. * dot(n, m) * dot(n, o);
+	float num2 = 2. * dot(n, m) * dot(n, i);
+	float denom1 = dot(o, m);
+	float denom2 = dot(i, m);
+	return min(1., min(num1/denom1, num2/denom2));
+}
 
-
-// ==============================================
+// ======================================================================
+// Main du Shader
+// ======================================================================
 void main(void)
 {
 	vec4 col= vec4(0.0);
