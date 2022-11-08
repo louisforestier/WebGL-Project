@@ -17,12 +17,12 @@ function readyDocument() {
     }
 
     acc = document.getElementById("objectChoice");
-    acc.addEventListener("click", function() {
+    acc.addEventListener("change", function() {
         OBJ1 = new objmesh(this.value);
     });
 
     acc = document.getElementById("shaderChoice");
-    acc.addEventListener("click", function() {
+    acc.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
         var slider = this.nextElementSibling;
         if(this.value == 2 || this.value == 1){
@@ -35,18 +35,37 @@ function readyDocument() {
 
     acc = document.getElementById("weirdSkybox");
     acc.addEventListener("click", function() {
-        var weird = document.getElementById("secondSkybox");
-        weird.classList.toggle("hidden");
+        var div = document.getElementById("secondSkybox");
+        var choice1 = document.getElementById("skyboxChoice");
+        var choice2 = document.getElementById("skyboxChoice2");
+        choice2.value = choice1.value;
+        if(this.checked)
+        {
+            div.classList.remove("hidden");
+        }
+        else 
+        {
+            div.classList.add("hidden"); 
+            OBJ1.setTexture(CUBEMAP.skyboxName); 
+            
+        }
     });
 
     acc = document.getElementById("skyboxChoice");
-    acc.addEventListener("click", function() {
-        CUBEMAP = new cubemap(this.value);
+    acc.addEventListener("change", function() {
+        console.log(this.value)
+        CUBEMAP.setTexture(this.value);
+        if(!document.getElementById("weirdSkybox").checked)
+        {
+            console.log("set texture of skybox and obj");
+            OBJ1.setTexture(this.value);
+        }
     });
 
-    acc = document.getElementById("secondSkybox");
-    acc.addEventListener("click", function() {
-        // Choix a faire pour la texture de la skybox modifié
+    acc = document.getElementById("skyboxChoice2");
+    acc.addEventListener("change", function() {
+        console.log("set texture of obj");
+        OBJ1.setTexture(this.value);
     });
 
     output.value = slider.value;

@@ -31,11 +31,12 @@ class cubemap {
 	// --------------------------------------------
 	constructor(name) {
 		this.shaderName='cubemap';
-        this.skyboxName = name;
 		this.loaded=-1;
 		this.shader = null;
+		this.texture = 0;
 		this.initAll();
-		
+		if(name != null)
+			this.setTexture(name);
 	}
 
 	// --------------------------------------------
@@ -81,7 +82,17 @@ class cubemap {
 		this.indexBuffer.numItems = indices.length;
 	
 		loadShaders(this);
-		this.initTextures();
+	}
+
+	setTexture(skyboxName)
+	{
+		if( skyboxName != null)
+		{
+			if(this.texture != 0)
+				gl.deleteTexture(this.texture);
+			this.skyboxName = skyboxName;
+			this.initTextures();
+		}
 	}
 
 	// --------------------------------------------
@@ -129,6 +140,7 @@ class cubemap {
 	// --------------------------------------------
 	setShadersParams() {
 		gl.useProgram(this.shader);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
 		gl.enableVertexAttribArray(this.shader.vAttrib);
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
@@ -167,14 +179,27 @@ class objmesh {
 	constructor(objFname) {
 		this.objName = objFname;
 		this.shaderName = 'obj';
+		this.skyboxName = 'lake';
 		this.loaded = -1;
 		this.shader = null;
 		this.mesh = null;
 		this.refractIndex = 1.52;
 		this.shaderState = ShaderState.Fresnel;
-		
+		this.texture = 0;
 		loadObjFile(this);
 		loadShaders(this);
+		this.initTextures();
+	}
+
+	setTexture(textureName)
+	{
+		if( textureName != null)
+		{
+			if(this.texture != 0)
+				gl.deleteTexture(this.texture);
+			this.skyboxName = textureName;
+			this.initTextures();
+		}
 	}
 
 	// --------------------------------------------
@@ -183,26 +208,25 @@ class objmesh {
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		var cubemapInfo =[
-			gl.TEXTURE_CUBE_MAP_POSITIVE_X ,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_X ,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Y ,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Z 
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"./skyboxes/" + this.skyboxName + "/right.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"./skyboxes/" + this.skyboxName + "/left.jpg"} ,
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Y, src:"./skyboxes/" + this.skyboxName + "/top.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, src:"./skyboxes/" + this.skyboxName + "/bottom.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_Z, src:"./skyboxes/" + this.skyboxName + "/front.jpg"},
+			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, src:"./skyboxes/" + this.skyboxName + "/back.jpg"} 
 		];
 
+		var cubemap_image = [];
+
+		var self = this;
 		for (let i = 0; i < cubemapInfo.length; i++) {
-			const element = cubemapInfo[i];
-			var texImage = new Image();
-			texImage.src = "test.jpg";
-	
-			this.texture.image = texImage;
-			var self = this;
-			texImage.onload = function () {
-				gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-				gl.texImage2D(element, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, self.texture.image);
-				gl.activeTexture(gl.TEXTURE0);
-			}
+			const {target,src} = cubemapInfo[i];
+			cubemap_image[i] = new Image();
+			cubemap_image[i].src = cubemapInfo[i].src;
+			cubemap_image[i].onload = function () {
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.texture);
+				gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubemap_image[i]);
+			}	
 		}
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -224,6 +248,7 @@ class objmesh {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
 		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 		this.shader.refractIndex = gl.getUniformLocation(this.shader, "uRefractIndex");
 		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
