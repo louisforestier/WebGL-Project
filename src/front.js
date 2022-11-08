@@ -25,7 +25,7 @@ function readyDocument() {
     acc.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
         var slider = this.nextElementSibling;
-        if(this.value == 2 || this.value == 1){
+        if(this.value == 2 || this.value == 1 || this.value == 4){
             slider.classList.remove("hidden");
         }
         else {
@@ -47,7 +47,6 @@ function readyDocument() {
         {
             div.classList.add("hidden"); 
             OBJ1.setTexture(CUBEMAP.skyboxName); 
-            
         }
     });
 
