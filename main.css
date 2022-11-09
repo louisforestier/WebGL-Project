@@ -36,6 +36,10 @@ dt{
     align-items: center;
 }
 
+p{
+    white-space: nowrap;
+}
+
 .squareColorPicker{
     appearance: none;
     width: 50px;
