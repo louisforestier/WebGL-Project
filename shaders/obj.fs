@@ -8,6 +8,7 @@ varying mat4 invRotMatrix;
 uniform samplerCube uSampler;
 uniform float uRefractIndex;
 uniform int uShaderState;
+uniform vec3 Kd;
 
 #define AIR_REFRACT_INDEX 1.0
 #define REFLECT 0
@@ -130,7 +131,6 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float in
 	float G = g(normal,m,i,Vo);
 	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
-	vec3 Kd = vec3(1.0, 0.0, 0.0);
 	vec3 Ks = vec3(1.0, 1.0, 1.0);
 	float Li = 2.0;
 	vec3 color = Li * ((Kd / PI) * (1.0 - F) +  Ks * fs) * dot(normal,i);
@@ -171,7 +171,7 @@ void main(void)
 	}
 	else 
 	{
-		vec3 color = vec3(0.8,0.4,0.4) * dot(normalize(N),normalize(vec3(-pos3D))); // Lambert rendering, eye light source
+		vec3 color = Kd * dot(normalize(N),normalize(vec3(-pos3D))); // Lambert rendering, eye light source
 		col= vec4(color,1.0);
 	}
 	gl_FragColor = col;

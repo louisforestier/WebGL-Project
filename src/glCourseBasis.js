@@ -187,6 +187,7 @@ class objmesh {
 		this.refractIndex = 1.52;
 		this.shaderState = ShaderState.Fresnel;
 		this.texture = 0;
+		this.color = [0.8,0.4,0.4];
 		loadObjFile(this);
 		loadShaders(this);
 		this.initTextures();
@@ -200,6 +201,12 @@ class objmesh {
 				gl.deleteTexture(this.texture);
 			this.skyboxName = textureName;
 			this.initTextures();
+		}
+	}
+
+	setColor(color){
+		if(color != null){
+			this.color = color;
 		}
 	}
 
@@ -254,6 +261,8 @@ class objmesh {
 		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
+		this.shader.Kd = gl.getUniformLocation(this.shader, "Kd");
+		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");

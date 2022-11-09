@@ -1,7 +1,12 @@
+function getColor(value){
+    return [parseInt(value.substring(1,3), 16)/255,
+                     parseInt(value.substring(3,5), 16)/255,
+                     parseInt(value.substring(5), 16)/255];
+}
+
 function readyDocument() {
     // Récupération des accordions de la page web
     var acc = document.getElementsByClassName("accordion");
-    var i;
     
     // Récupération du slider et de l'input number de l'indice de réfraction
     var sliderRef = document.getElementById("refractIndex");
@@ -12,7 +17,7 @@ function readyDocument() {
     var outputReg = document.getElementById("valueReg");
 
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
-    for(i = 0; i < acc.length; i++){
+    for(var i = 0; i < acc.length; i++){
         acc[i].addEventListener("click", function() {
             this.classList.toggle("active");
             var panel = this.nextElementSibling;
@@ -36,6 +41,7 @@ function readyDocument() {
             OBJ1.setTexture(CUBEMAP.skyboxName);
         }
         OBJ1.refractIndex = sliderRef.value;
+        OBJ1.setColor(getColor(document.getElementById("colDiff").value));
     });
 
 
@@ -60,8 +66,8 @@ function readyDocument() {
     // Code éxécuter à chaque changement du color picker de couleur spéculaire
     acc = document.getElementById("colDiff");
     acc.addEventListener("change", function() {
-        // A faire : quand la couleur diffuse change
-        console.log("Nouvelle couleur diff");
+        console.log(getColor(this.value));
+        OBJ1.setColor(getColor(this.value));
     });
 
     // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
