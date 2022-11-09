@@ -15,7 +15,20 @@ function readyDocument() {
     // Récupération du slider et de l'input number de la rugosité
     var sliderReg = document.getElementById("rugosity");
     var outputReg = document.getElementById("valueReg");
+    
+    // Récupération des listes déroulantes des objets, des shaders, 
+    // de la skybox et de la skybox réfléchi par l'objet
+    var object = document.getElementById("objectChoice");
+    var shader = document.getElementById("shaderChoice");
+    var skybox = document.getElementById("skyboxChoice");
+    var objSkybox = document.getElementById("skyboxChoice2");
 
+    // Récupération de la couleur du color picker
+    var color = document.getElementById("colDiff");
+    
+    // Récupération de la checkbow Weird Color
+    var checkboxWS = document.getElementById("weirdSkybox");
+    
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
     for(var i = 0; i < acc.length; i++){
         acc[i].addEventListener("click", function() {
@@ -30,24 +43,22 @@ function readyDocument() {
     }
 
     // Code éxécuter à chaque changement de la liste déroulante des objets
-    acc = document.getElementById("objectChoice");
-    acc.addEventListener("change", function() {
+    object.addEventListener("change", function() {
         OBJ1 = new objmesh(this.value);
-        OBJ1.shaderState = document.getElementById("shaderChoice").value;
-        if(document.getElementById("weirdSkybox").checked){
-            OBJ1.setTexture(document.getElementById("skyboxChoice2").value);
+        OBJ1.shaderState = shader.value;
+        if(checkboxWS.checked){
+            OBJ1.setTexture(objSkybox.value);
         }
         else {
             OBJ1.setTexture(CUBEMAP.skyboxName);
         }
         OBJ1.refractIndex = sliderRef.value;
-        OBJ1.setColor(getColor(document.getElementById("colDiff").value));
+        OBJ1.setColor(getColor(color.value));
     });
 
 
     // Code éxécuter à chaque changement de la liste déroulante des shaders
-    acc = document.getElementById("shaderChoice");
-    acc.addEventListener("change", function() {
+    shader.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
         if(this.value == 2 || this.value == 1 || this.value == 4){
             sliderRef.parentElement.classList.remove("hidden");
@@ -64,19 +75,15 @@ function readyDocument() {
     });
 
     // Code éxécuter à chaque changement du color picker de couleur spéculaire
-    acc = document.getElementById("colDiff");
-    acc.addEventListener("change", function() {
+    color.addEventListener("change", function() {
         console.log(getColor(this.value));
         OBJ1.setColor(getColor(this.value));
     });
 
     // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
-    acc = document.getElementById("weirdSkybox");
-    acc.addEventListener("click", function() {
+    checkboxWS.addEventListener("click", function() {
         var div = document.getElementById("secondSkybox");
-        var choice1 = document.getElementById("skyboxChoice");
-        var choice2 = document.getElementById("skyboxChoice2");
-        choice2.value = choice1.value;
+        objSkybox.value = skybox.value;
         if(this.checked)
         {
             div.classList.remove("hidden");
@@ -89,11 +96,10 @@ function readyDocument() {
     });
 
     // Code éxécuter à chaque fois que l'on change la valeur de la skybox
-    acc = document.getElementById("skyboxChoice");
-    acc.addEventListener("change", function() {
+    skybox.addEventListener("change", function() {
         console.log(this.value)
         CUBEMAP.setTexture(this.value);
-        if(!document.getElementById("weirdSkybox").checked)
+        if(!checkboxWS.checked)
         {
             console.log("set texture of skybox and obj");
             OBJ1.setTexture(this.value);
@@ -101,8 +107,7 @@ function readyDocument() {
     });
 
     // Code éxécuter à chaque fois que l'on change la valeur de la skybox de l'objet
-    acc = document.getElementById("skyboxChoice2");
-    acc.addEventListener("change", function() {
+    objSkybox.addEventListener("change", function() {
         console.log("set texture of obj");
         OBJ1.setTexture(this.value);
     });
