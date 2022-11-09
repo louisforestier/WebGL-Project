@@ -64,13 +64,6 @@ function readyDocument() {
         console.log("Nouvelle couleur diff");
     });
 
-    // Code éxécuter à chaque changement du color picker de couleur diffuse
-    acc = document.getElementById("colSpec");
-    acc.addEventListener("change", function() {
-        // A faire : quand la couleur spéculaire change
-        console.log("Nouvelle couleur spec");
-    });
-
     // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
     acc = document.getElementById("weirdSkybox");
     acc.addEventListener("click", function() {

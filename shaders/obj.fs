@@ -128,7 +128,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float in
 	float F = fresnelFactor(i,m,ind2);
 	float D = beckmann(normal,m,sigma);
 	float G = g(normal,m,i,Vo);
-	float fs = (F * D * G) / (PI * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
+	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
 	vec3 Kd = vec3(1.0, 0.0, 0.0);
 	vec3 Ks = vec3(1.0, 1.0, 1.0);
