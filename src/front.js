@@ -1,6 +1,15 @@
 function readyDocument() {
+    // Récupération des accordions de la page web
     var acc = document.getElementsByClassName("accordion");
     var i;
+    
+    // Récupération du slider et de l'input number de l'indice de réfraction
+    var sliderRef = document.getElementById("refractIndex");
+    var outputRef = document.getElementById("valueRef");
+    
+    // Récupération du slider et de l'input number de la rugosité
+    var sliderReg = document.getElementById("rugosity");
+    var outputReg = document.getElementById("valueReg");
 
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
     for(i = 0; i < acc.length; i++){
@@ -19,6 +28,14 @@ function readyDocument() {
     acc = document.getElementById("objectChoice");
     acc.addEventListener("change", function() {
         OBJ1 = new objmesh(this.value);
+        OBJ1.shaderState = document.getElementById("shaderChoice").value;
+        if(document.getElementById("weirdSkybox").checked){
+            OBJ1.setTexture(document.getElementById("skyboxChoice2").value);
+        }
+        else {
+            OBJ1.setTexture(CUBEMAP.skyboxName);
+        }
+        OBJ1.refractIndex = sliderRef.value;
     });
 
 
@@ -26,19 +43,17 @@ function readyDocument() {
     acc = document.getElementById("shaderChoice");
     acc.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
-        var sliderRef = this.nextElementSibling;
-        var sliderReg = this.nextElementSibling.nextElementSibling;
         if(this.value == 2 || this.value == 1 || this.value == 4){
-            sliderRef.classList.remove("hidden");
+            sliderRef.parentElement.classList.remove("hidden");
         }
         else {
-            sliderRef.classList.add("hidden");
+            sliderRef.parentElement.classList.add("hidden");
         }
         if(this.value == 4){
-            sliderReg.classList.remove("hidden");
+            sliderReg.parentElement.classList.remove("hidden");
         }
         else {
-            sliderReg.classList.add("hidden");
+            sliderReg.parentElement.classList.add("hidden");
         }
     });
 
@@ -93,10 +108,7 @@ function readyDocument() {
         OBJ1.setTexture(this.value);
     });
 
-    // Récupération du slider et de l'input number de l'indice de réfraction
-    var sliderRef = document.getElementById("refractIndex");
-    var outputRef = document.getElementById("valueRef");
-
+    // Affecter les valeurs pour le coefficient de refraction
     // Affecte au champ nombre la valeur du slider
     outputRef.value = sliderRef.value;
 
@@ -112,10 +124,7 @@ function readyDocument() {
         OBJ1.refractIndex = this.value;
     }
 
-    // Récupération du slider et de l'input number de la rugosité
-    var sliderReg = document.getElementById("rugosity");
-    var outputReg = document.getElementById("valueReg");
-
+    // Affecter les valeurs pour la Rugosité
     // Affecte au champ nombre la valeur du slider
     outputReg.value = sliderReg.value;
 
