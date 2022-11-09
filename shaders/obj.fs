@@ -119,30 +119,37 @@ float g(vec3 n, vec3 m, vec3 i, vec3 o)
 	return min(1., min(num1/denom1, num2/denom2));
 }
 
+// Calcul de l'éclairement d'un objet selon Cook & Torrence
 // avec 0,0,0 comme position d'une source lumineuse
 vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float ind2, float sigma)
 {
+    // Calcul des vecteurs nécessaires plus bas
 	vec3 Vo = normalize(-pos);
 	vec3 i = Vo;
 	vec3 m = normalize(i+Vo);
 
+    // Calcul de la fonction Fs a partir des fonctions F, D et G
 	float F = fresnelFactor(i,m,ind2);
 	float D = beckmann(normal,m,sigma);
 	float G = g(normal,m,i,Vo);
 	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
+    // Calcul de la couleur de l'objet
 	vec3 Ks = vec3(1.0, 1.0, 1.0);
 	float Li = 2.0;
 	vec3 color = Li * ((Kd / PI) * (1.0 - F) +  Ks * fs) * dot(normal,i);
+
+    // Calcul de la reflexion de l'objet
 	vec4 Vi = vec4(reflect(-Vo,normal),1.0);
 	Vi = invRotMatrix * Vi;
 	vec3 mColor = textureCube(uSampler,adaptDir(Vi)).rgb;
 
+    // Calcul de la transmission de l'objet
 	vec4 Vt = vec4(refract(-Vo,normal,ind1/ind2),1.0);
 	Vt = invRotMatrix * Vt;
-
 	vec3 tColor = textureCube(uSampler,adaptDir(Vt)).rgb;
 
+    // Calcul de la valeur final de la couleur pour l'objet
 	return vec4(color * (F * mColor + (1.0-F) * tColor),1.0);
 }
 
