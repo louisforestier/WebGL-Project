@@ -11,20 +11,13 @@ function readyDocument() {
     // Récupération du slider et de l'input number de l'indice de réfraction
     var sliderRef = document.getElementById("refractIndex");
     var outputRef = document.getElementById("valueRef");
-    
-    // Récupération du slider et de l'input number de la rugosité
-    var sliderReg = document.getElementById("rugosity");
-    var outputReg = document.getElementById("valueReg");
-    
+        
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
     var object = document.getElementById("objectChoice");
     var shader = document.getElementById("shaderChoice");
     var skybox = document.getElementById("skyboxChoice");
     var objSkybox = document.getElementById("skyboxChoice2");
-
-    // Récupération de la couleur du color picker
-    var color = document.getElementById("colDiff");
     
     // Récupération de la checkbow Weird Color
     var checkboxWS = document.getElementById("weirdSkybox");
@@ -74,12 +67,6 @@ function readyDocument() {
         }
     });
 
-    // Code éxécuter à chaque changement du color picker de couleur spéculaire
-    color.addEventListener("change", function() {
-        console.log(getColor(this.value));
-        OBJ1.setColor(getColor(this.value));
-    });
-
     // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
     checkboxWS.addEventListener("click", function() {
         var div = document.getElementById("secondSkybox");
@@ -126,21 +113,5 @@ function readyDocument() {
     outputRef.oninput = function() {
         sliderRef.value = this.value;
         OBJ1.refractIndex = this.value;
-    }
-
-    // Affecter les valeurs pour la Rugosité
-    // Affecte au champ nombre la valeur du slider
-    outputReg.value = sliderReg.value;
-
-    // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
-    sliderReg.oninput = function() {
-        outputReg.value = this.value;
-        // A faire : mettre à jour la rugosité
-    }
-
-    // Code permettant de mettre à jour l'input nom quand le slider change
-    outputReg.oninput = function() {
-        sliderReg.value = this.value;
-        // A faire : mettre à jour la rugosité
     }
 }
