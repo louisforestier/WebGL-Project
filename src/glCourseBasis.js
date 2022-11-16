@@ -186,6 +186,7 @@ class objmesh {
 		this.mesh = null;
 		this.refractIndex = 1.52;
 		this.rugosity = 0.1;
+		this.lightIntensity = 1.0;
 		this.shaderState = ShaderState.Fresnel;
 		this.texture = 0;
 		this.color = [0.8,0.4,0.4];
@@ -262,6 +263,8 @@ class objmesh {
 		gl.uniform1f(this.shader.refractIndex,this.refractIndex);
 		this.shader.sigma = gl.getUniformLocation(this.shader, "uSigma");
 		gl.uniform1f(this.shader.sigma,this.rugosity);
+		this.shader.lightIntensity = gl.getUniformLocation(this.shader, "uLightIntensity");
+		gl.uniform1f(this.shader.lightIntensity,this.lightIntensity);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "Kd");

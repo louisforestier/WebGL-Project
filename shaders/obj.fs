@@ -8,6 +8,7 @@ varying mat4 invRotMatrix;
 uniform samplerCube uSampler;
 uniform float uRefractIndex;
 uniform float uSigma;
+uniform float uLightIntensity;
 uniform int uShaderState;
 uniform vec3 Kd;
 
@@ -143,7 +144,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
     // Calcul de la valeur final de la couleur pour l'objet
 	vec3 color = ((Kd / PI) * (1.0 - F) +  vec3(fs));
 
-	color = Li * color * dot(normal,i);
+	color = uLightIntensity * color * dot(normal,i);
 	
 	return vec4(color,1.0);
 }

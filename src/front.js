@@ -157,12 +157,12 @@ function readyDocument() {
     // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
     sliderInt.oninput = function() {
         outputInt.value = this.value;
-        // TODO : ajouter l'intensité dans l'obj
+        OBJ1.lightIntensity = this.value;
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
     outputInt.oninput = function() {
         sliderInt.value = this.value;
-        // TODO : ajouter l'intensité dans l'obj
+        OBJ1.lightIntensity = this.value;
     }
 }
