@@ -8,6 +8,7 @@ FORESTIER Louis**
 
 - [Fonctionnalités implantés](#fonctionnalités-implantés)
   - [Jalon 1](#jalon-1)
+  - [Jalon 2](#jalon-2)
   - [Bonus](#bonus)
 - [Description de l'archive](#description-de-larchive)
 
@@ -20,6 +21,10 @@ Dans cette séction, nous allons détailler les fonction implantés dans notre r
 - Réflection
 - Réfraction, avec possibilité de jouer sur l'index de réfraction
 - Réflection, Réfraction et effet de **Frensel**, avec possibilité de jouer sur l'index de réfraction
+
+### Jalon 2
+
+- Ajout de l'équation de **Cook & Torrence**, avec possibilité de jouer sur la rugosité de l'objet et l'intensité de la lumière
 
 ### Bonus
 
