@@ -57,6 +57,8 @@ function readyDocument() {
             OBJ1.setTexture(CUBEMAP.skyboxName);
         }
         OBJ1.refractIndex = sliderRef.value;
+        OBJ1.rugosity = sliderReg.value;
+        OBJ1.lightIntensity = sliderInt.value
         OBJ1.setColor(getColor(color.value));
     });
 
