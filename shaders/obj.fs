@@ -10,7 +10,7 @@ uniform float uRefractIndex;
 uniform float uSigma;
 uniform float uLightIntensity;
 uniform int uShaderState;
-uniform vec3 Kd;
+uniform vec3 uKd;
 
 #define AIR_REFRACT_INDEX 1.0
 #define REFLECT 0
@@ -142,7 +142,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	vec3 Li = textureCube(uSampler,adaptDir(Vi)).rgb;
 
     // Calcul de la valeur final de la couleur pour l'objet
-	vec3 color = ((Kd / PI) * (1.0 - F) +  vec3(fs));
+	vec3 color = ((uKd / PI) * (1.0 - F) +  vec3(fs));
 
 	color = uLightIntensity * color * dot(normal,i);
 	
@@ -174,7 +174,7 @@ void main(void)
 	}
 	else 
 	{
-		vec3 color = Kd * dot(normalize(N),normalize(vec3(-pos3D))); // Lambert rendering, eye light source
+		vec3 color = uKd * dot(normalize(N),normalize(vec3(-pos3D))); // Lambert rendering, eye light source
 		col= vec4(color,1.0);
 	}
 	gl_FragColor = col;
