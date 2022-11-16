@@ -15,6 +15,10 @@ function readyDocument() {
     // Récupération du slider et de l'input number de la rugosité
     var sliderReg = document.getElementById("rugosity");
     var outputReg = document.getElementById("valueReg");
+
+    // Récupération du slider et de l'input number de l'intensité de la lumière
+    var sliderInt = document.getElementById("intensity");
+    var outputInt = document.getElementById("valueInt");
     
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
@@ -68,9 +72,11 @@ function readyDocument() {
         }
         if(this.value == 4){
             sliderReg.parentElement.classList.remove("hidden");
+            sliderInt.parentElement.classList.remove("hidden");
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
+            sliderInt.parentElement.classList.add("hidden");
         }
     });
 
@@ -142,5 +148,21 @@ function readyDocument() {
     outputReg.oninput = function() {
         sliderReg.value = this.value;
         OBJ1.rugosity = this.value;
+    }
+
+    // Affecter les valeurs pour l'intensité de la lumière
+    // Affecte au champ nombre la valeur du slider
+    outputInt.value = sliderInt.value;
+
+    // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
+    sliderInt.oninput = function() {
+        outputInt.value = this.value;
+        // TODO : ajouter l'intensité dans l'obj
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    outputInt.oninput = function() {
+        sliderInt.value = this.value;
+        // TODO : ajouter l'intensité dans l'obj
     }
 }
