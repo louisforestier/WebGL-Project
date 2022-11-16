@@ -7,6 +7,7 @@ varying mat4 invRotMatrix;
 
 uniform samplerCube uSampler;
 uniform float uRefractIndex;
+uniform float uSigma;
 uniform int uShaderState;
 uniform vec3 Kd;
 
@@ -140,12 +141,9 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	vec3 Li = textureCube(uSampler,adaptDir(Vi)).rgb;
 
     // Calcul de la valeur final de la couleur pour l'objet
-	vec3 color = ((Kd / PI) * (1.0 - F) +  vec3(fs,fs,fs));
+	vec3 color = ((Kd / PI) * (1.0 - F) +  vec3(fs));
 
-	//Correction gamma faite après application de la texture (Li), potentiellement faire la correction après
 	color = Li * color * dot(normal,i);
-	float gamma = 2.2;
-	color = pow(color,vec3(1.0/gamma));
 	
 	return vec4(color,1.0);
 }
@@ -171,7 +169,7 @@ void main(void)
 	}
 	else if(uShaderState == COOKTORRANCE)
 	{
-		col = cookTorrance(pos3D.xyz, normalize(N), invRotMatrix,uRefractIndex,0.1);
+		col = cookTorrance(pos3D.xyz, normalize(N), invRotMatrix,uRefractIndex,uSigma);
 	}
 	else 
 	{

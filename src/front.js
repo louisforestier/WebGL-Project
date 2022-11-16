@@ -135,12 +135,12 @@ function readyDocument() {
     // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
     sliderReg.oninput = function() {
         outputReg.value = this.value;
-        // A faire : mettre à jour la rugosité
+        OBJ1.rugosity = this.value;
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
     outputReg.oninput = function() {
         sliderReg.value = this.value;
-        // A faire : mettre à jour la rugosité
+        OBJ1.rugosity = this.value;
     }
 }
