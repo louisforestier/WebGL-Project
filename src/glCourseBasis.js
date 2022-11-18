@@ -9,7 +9,7 @@ var distCENTER;
 // =====================================================
 
 var USHORT_MAX = 65535;
-
+var DRAWPLANE = true;
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
@@ -584,7 +584,9 @@ function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	
 	// Drawing objects
-	PLANE.draw();
+    if(DRAWPLANE){
+        PLANE.draw();
+    }
 	OBJ1.draw();
 	CUBEMAP.draw();
 }

@@ -33,6 +33,7 @@ Dans cette séction, nous allons détailler les fonction implantés dans notre r
 
 - Possibilité de changer d'objet
 - Possibilité de changer la skybox
+- Possibilité de désactiver le plan
 - Possibilité d'avoir un objet réfléchissant un skybox différente que celle de la scène
 - Activation de l'extension permettant de gérer les objets avec des maillages composés de plus de 65535 sommets
 

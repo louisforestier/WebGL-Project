@@ -30,8 +30,9 @@ function readyDocument() {
     // Récupération de la couleur du color picker
     var color = document.getElementById("colDiff");
     
-    // Récupération de la checkbow Weird Color
+    // Récupération de des checkbox
     var checkboxWS = document.getElementById("weirdSkybox");
+    var checkboxP = document.getElementById("plane")
     
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
     for(var i = 0; i < acc.length; i++){
@@ -101,6 +102,11 @@ function readyDocument() {
             div.classList.add("hidden"); 
             OBJ1.setTexture(CUBEMAP.skyboxName); 
         }
+    });
+
+    // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
+    checkboxP.addEventListener("click", function() {
+        DRAWPLANE = this.checked;
     });
 
     // Code éxécuter à chaque fois que l'on change la valeur de la skybox
