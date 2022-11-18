@@ -104,7 +104,7 @@ function readyDocument() {
         }
     });
 
-    // Code éxécuter à chaque fois que la checkbox "weird skybox" est cliqué
+    // Code éxécuter à chaque fois que la checkbox "Afficher le plan" est cliqué
     checkboxP.addEventListener("click", function() {
         DRAWPLANE = this.checked;
     });
