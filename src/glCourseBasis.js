@@ -8,6 +8,8 @@ var rotMatrix = mat4.create();
 var distCENTER;
 // =====================================================
 
+var USHORT_MAX = 65535;
+
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
@@ -346,7 +348,14 @@ class objmesh {
 			this.setShadersParams();
 			this.setMatrixUniforms();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
-			gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
+			if(this.mesh.indexBuffer.numItems > USHORT_MAX)
+			{
+				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
+			}
+			else
+			{
+				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+			}
 		}
 	}
 }

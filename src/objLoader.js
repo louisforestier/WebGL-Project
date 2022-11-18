@@ -372,7 +372,14 @@
 
     mesh.indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(mesh.indices), gl.STATIC_DRAW);
+    if (mesh.indices.length > 65535) 
+    {
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(mesh.indices), gl.STATIC_DRAW);
+    } 
+    else 
+    {
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);      
+    }
     mesh.indexBuffer.itemSize = 1;
     mesh.indexBuffer.numItems = mesh.indices.length;
   }
