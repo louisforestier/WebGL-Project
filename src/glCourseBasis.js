@@ -1,6 +1,3 @@
-/*
-TODO: demander comment toujours garder la skybox en vue
-*/ 
 // =====================================================
 var gl;
 
@@ -15,6 +12,9 @@ var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
 
+/**
+ * Enumeration pour décrire le calcul à appliquer dans la shader obj.fs
+ */
 const ShaderState = {
 	Reflect:0,
 	Refract:1,
@@ -26,21 +26,27 @@ const ShaderState = {
 // =====================================================
 // CUBEMAP
 // =====================================================
-
+/**
+ * classe permettant d'afficher un cube texturé
+ */
 class cubemap {
 
-	// --------------------------------------------
+	/**
+	 * Constructeur.
+	 * @param {string} name nom de la skybox à charger
+	 */
 	constructor(name) {
 		this.shaderName='cubemap';
 		this.loaded=-1;
 		this.shader = null;
 		this.texture = 0;
+		this.skyboxName = name;
 		this.initAll();
-		if(name != null)
-			this.setTexture(name);
 	}
 
-	// --------------------------------------------
+	/**
+	 * intialise les buffers de positions et d'indices de sommets, la shader et la texture
+	 */
 	initAll() {
 		var size=20.0;
 		var vertices = [
@@ -67,24 +73,34 @@ class cubemap {
 			6,7,3,
 			7,5,4,
 			7,6,5
-
 		];
 
+		// création du buffer des sommets sur gpu
 		this.vertexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 		this.vertexBuffer.itemSize = 3;
 		this.vertexBuffer.numItems = vertices.length / 3;
 
+		// création du buffer des indices sur gpu
 		this.indexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 		this.indexBuffer.itemSize = 1;
 		this.indexBuffer.numItems = indices.length;
 	
+		// chargement de la shader cubemap
 		loadShaders(this);
+
+		// charge la texture de la cubemap
+		this.setTexture(this.skyboxName);
 	}
 
+	/**
+	 * change la texture courante de la cubemap
+	 * supprime l'ancienne
+	 * @param {string} skyboxName nom de la skybox à charger 
+	 */
 	setTexture(skyboxName)
 	{
 		if( skyboxName != null)
@@ -96,11 +112,14 @@ class cubemap {
 		}
 	}
 
-	// --------------------------------------------
+	/**
+	 * crée une texture pour cubemap et crée une callback pour la charger sur gpu
+	 */
 	initTextures()
 	{
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		// crée un tableau contenant la face selon les axes x,y,z et l'image source correspondante
 		var cubemapInfo =[
 			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"./skyboxes/" + this.skyboxName + "/right.jpg"} ,
 			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"./skyboxes/" + this.skyboxName + "/left.jpg"} ,
@@ -113,6 +132,7 @@ class cubemap {
 		var cubemap_image = [];
 
 		var self = this;
+		// pour chaque image composant la cubemap, on crée une texture 2d avec la face et l'image source correspondante
 		for (let i = 0; i < cubemapInfo.length; i++) {
 			const {target,src} = cubemapInfo[i];
 			cubemap_image[i] = new Image();
@@ -129,16 +149,9 @@ class cubemap {
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 
-	// --------------------------------------------
-	initShaders(){
-		gl.useProgram(this.shader);
-		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
-		gl.enableVertexAttribArray(this.shader.vAttrib);
-		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
-		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
-	}
-
-	// --------------------------------------------
+	/**
+	 * bind la shader de l'objet et sa texture et récupère les handles des attributs et des uniforms
+	 */
 	setShadersParams() {
 		gl.useProgram(this.shader);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
@@ -150,7 +163,9 @@ class cubemap {
 		gl.vertexAttribPointer(this.shader.vAttrib, this.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	}
 	
-	// --------------------------------------------
+	/**
+	 * calcul et envoie les matrices de rotation, modelview et projection
+	 */
 	setMatrixUniforms() {
 		mat4.identity(mvMatrix);
 		mat4.multiply(mvMatrix, rotMatrix);
@@ -159,7 +174,9 @@ class cubemap {
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
 	}
 
-	// --------------------------------------------
+	/**
+	 * affiche l'objet après avoir envoyé les variables à la shader
+	 */
 	draw() {
 		if(this.shader && this.loaded==4) {
 			this.setShadersParams();
@@ -174,9 +191,21 @@ class cubemap {
 // OBJET 3D, lecture fichier obj
 // =====================================================
 
+/**
+ * classe permettant d'afficher un maillage à partir d'un fichier obj
+ */
 class objmesh {
 
-	// --------------------------------------------
+	/**
+	 * Constructeur.
+	 * initialise la cubemap utilisé pour la réflexion et la réfraction à lake
+	 * initialise l'indice de réfraction à 1.52 (indice du verre)
+	 * initialise la rugosité à 0.1
+	 * initialise le calcul effectué dans la shader à fresnel
+	 * initialise la couleur à (0.8,0.4,0.4)
+	 * charge la mesh, la shader et la texture
+	 * @param {string} objFname nom de l'obj à charger
+	 */
 	constructor(objFname) {
 		this.objName = objFname;
 		this.shaderName = 'obj';
@@ -190,11 +219,24 @@ class objmesh {
 		this.shaderState = ShaderState.Fresnel;
 		this.texture = 0;
 		this.color = [0.8,0.4,0.4];
-		loadObjFile(this);
-		loadShaders(this);
-		this.initTextures();
+		this.initAll();
 	}
 
+	/**
+	 * charge la mesh, la shader et la texture
+	 */
+	initAll() {
+		loadObjFile(this);
+		loadShaders(this);
+		this.setTexture(this.skyboxName);
+
+	}
+
+	/**
+	 * change la texture courante de la cubemap utilisée pour la réflexion et réfraction
+	 * supprime l'ancienne
+	 * @param {string} textureName nom de la texture 
+	 */
 	setTexture(textureName)
 	{
 		if( textureName != null)
@@ -206,17 +248,24 @@ class objmesh {
 		}
 	}
 
+	/**
+	 * modifie la couleur diffuse de l'objet
+	 * @param {[float, float, float]} color couleur de l'objet composé de trois flottants entre 0 et 1
+	 */
 	setColor(color){
 		if(color != null){
 			this.color = color;
 		}
 	}
 
-	// --------------------------------------------
+	/**
+	 * crée une texture et crée une callback pour la charger sur gpu
+	 */
 	initTextures()
 	{
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		// crée un tableau contenant la face selon les axes x,y,z et l'image source correspondante
 		var cubemapInfo =[
 			{target:gl.TEXTURE_CUBE_MAP_POSITIVE_X, src:"./skyboxes/" + this.skyboxName + "/right.jpg"} ,
 			{target:gl.TEXTURE_CUBE_MAP_NEGATIVE_X, src:"./skyboxes/" + this.skyboxName + "/left.jpg"} ,
@@ -229,6 +278,7 @@ class objmesh {
 		var cubemap_image = [];
 
 		var self = this;
+		// pour chaque image composant la cubemap, on crée une texture 2d avec la face et l'image source correspondante
 		for (let i = 0; i < cubemapInfo.length; i++) {
 			const {target,src} = cubemapInfo[i];
 			cubemap_image[i] = new Image();
@@ -245,7 +295,9 @@ class objmesh {
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 
-	// --------------------------------------------
+	/**
+	 * bind la shader de l'objet et sa texture et récupère les handles des attributs et des uniforms
+	 */
 	setShadersParams() {
 		gl.useProgram(this.shader);
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
@@ -274,8 +326,10 @@ class objmesh {
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 	}
 	
-	// --------------------------------------------
-	setMatrixUniforms() {
+	/**
+	 * calcul et envoie les matrices de rotation, modelview et projection
+	 */
+	 setMatrixUniforms() {
 		mat4.identity(mvMatrix);
 		mat4.translate(mvMatrix, distCENTER);
 		mat4.multiply(mvMatrix, rotMatrix);
@@ -284,13 +338,15 @@ class objmesh {
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
 	}
 	
-	// --------------------------------------------
-	draw() {
+	/**
+	 * affiche l'objet après avoir envoyé les variables à la shader
+	 */
+	 draw() {
 		if(this.shader && this.loaded==4 && this.mesh != null) {
 			this.setShadersParams();
 			this.setMatrixUniforms();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
-			gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+			gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
 		}
 	}
 }
@@ -299,9 +355,14 @@ class objmesh {
 // PLAN 3D, Support géométrique
 // =====================================================
 
+/**
+ * classe permettant d'afficher un plan
+ */
 class plane {
 	
-	// --------------------------------------------
+	/**
+	 * Constructeur.
+	 */
 	constructor() {
 		this.shaderName='plane';
 		this.loaded=-1;
@@ -309,7 +370,9 @@ class plane {
 		this.initAll();
 	}
 		
-	// --------------------------------------------
+	/**
+	 * Initialise les buffers de position et de coordonnées de texture et la shader.
+	 */
 	initAll() {
 		var size=1.0;
 		var vertices = [
@@ -341,8 +404,11 @@ class plane {
 		loadShaders(this);
 	}
 	
-	// --------------------------------------------
-	setShadersParams() {
+	/**
+	 * bind la shader de l'objet et sa texture et récupère les handles des attributs et des uniforms
+	 * calcul et envoie les matrices de rotation, modelview et projection
+	 */
+	 setShadersParams() {
 		gl.useProgram(this.shader);
 
 		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
@@ -366,8 +432,10 @@ class plane {
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
 	}
 
-	// --------------------------------------------
-	draw() {
+	/**
+	 * affiche l'objet après avoir envoyé les variables à la shader
+	 */
+	 draw() {
 		if(this.shader && this.loaded==4) {		
 			this.setShadersParams();
 			
@@ -394,6 +462,8 @@ function initGL(canvas)
 		gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.CULL_FACE);
 		gl.cullFace(gl.BACK); 
+		// active l'extension permettant d'utiliser gl.UNSIGNED_INT dans gl.drawElements, pour afficher des modèles plus complexes
+		gl.getExtension('OES_element_index_uint');
 	} catch (e) {}
 	if (!gl) {
 		console.log("Could not initialise WebGL");
