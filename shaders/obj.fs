@@ -136,11 +136,6 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	float G = g(normal,m,i,Vo);
 	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
-    // Calcul de la reflexion de l'objet
-	vec4 Vi = vec4(reflect(-Vo,normal),1.0);
-	Vi = invRotMatrix * Vi;
-	vec3 Li = textureCube(uSampler,adaptDir(Vi)).rgb;
-
     // Calcul de la valeur final de la couleur pour l'objet
 	vec3 color = ((uKd / PI) * (1.0 - F) +  vec3(fs));
 
