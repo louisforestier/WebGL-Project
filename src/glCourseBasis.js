@@ -22,7 +22,8 @@ const ShaderState = {
 	Refract:1,
 	Fresnel:2,
 	Color:3,
-	CookTorrance:4
+	CookTorrance:4,
+	Echantillonnage:5
 };
 
 // =====================================================

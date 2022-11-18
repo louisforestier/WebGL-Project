@@ -17,6 +17,7 @@ uniform vec3 uKd;
 #define REFRACT 1
 #define FRESNEL 2
 #define COOKTORRANCE 4
+#define ECHANTILLONNAGE 5
 
 #define PI 3.1415926538
 
@@ -144,6 +145,80 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	return vec4(color,1.0);
 }
 
+// ======================================================================
+// Jalon 3 : Echantillonnage d'importancce
+// ======================================================================
+
+//utiliser le temps + randconst pour la seed, en donnant le temps en uniform
+float PHI = 1.61803398874989484820459;  // Φ = Golden Ratio   
+
+float gold_noise(vec2 xy, float seed){
+	return fract(tan(distance(xy*PHI, xy)*seed)*xy.x);
+}
+float RAND_CONST = 0.0;
+float rand()
+{
+	vec2 co = (invRotMatrix * gl_FragCoord).xy;
+	co += RAND_CONST;
+	// limite le nombre d'échantillon à 100
+	RAND_CONST += 0.1;
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec3 computeNormal(vec3 normal, float sigma)
+{
+	float rand1 = rand();
+	float rand2 = rand(); 
+	float phi = rand1 * 2.0 * PI;
+	float theta = atan(sqrt(-square(sigma) * log(1.0-rand2)));
+	vec3 m = vec3(0.0);
+	m.x = sin(theta) * cos (phi);
+	m.y = sin(theta) * sin(phi);
+	m.z = cos(theta);
+	return m;
+}
+
+vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigma)
+{
+	float pdf_sum = 0.0;
+	vec3 color = vec3(0.0);
+	for(int k = 0; k < 100 ; k++)
+	{
+		vec3 m = normalize(computeNormal(normal,sigma));
+		float pdf = beckmann(normal, m, sigma) * dot(normal,m);
+		// Calcul des vecteurs nécessaires plus bas
+		vec3 Vo = normalize(-pos);
+		vec3 i = Vo;
+
+		// Calcul de la fonction Fs a partir des fonctions F, D et G
+		float F = fresnelFactor(i,m,ni);
+		float D = beckmann(normal,m,sigma);
+		float G = g(normal,m,i,Vo);
+		float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
+
+		// Calcul de la valeur final de la couleur pour l'objet
+		vec3 color1 = vec3(fs);
+
+		// vec3 i0 = vec3(1,0,0);
+		// if(dot(i0,normal)>0.8)
+		// {
+		// 	i0 = vec3(0,1,0);
+		// }
+
+		// vec3 j = cross(i0,normal);
+		// vec3 i1 = cross(j,normal);
+		// mat3 Mrl = mat3(0.0);
+		// Mrl[0] = i1;
+		// Mrl[1] = j;
+		// Mrl[2] = normal;
+		
+		vec4 mColor = vec4(textureCube(uSampler,adaptDir(m)).rgb,1.0);
+		color1 = color1 * dot(m,i);
+		color += color1/100.0;
+	}
+	return vec4(color,1.0);
+}
+
 
 // ======================================================================
 // Main du Shader
@@ -166,6 +241,10 @@ void main(void)
 	else if(uShaderState == COOKTORRANCE)
 	{
 		col = cookTorrance(pos3D.xyz, normalize(N), invRotMatrix,uRefractIndex,uSigma);
+	}
+	else if(uShaderState == ECHANTILLONNAGE)
+	{
+		col = echantillonnage(pos3D.xyz, normalize(N), invRotMatrix,uRefractIndex,uSigma);
 	}
 	else 
 	{
