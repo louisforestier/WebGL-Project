@@ -138,7 +138,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
     // Calcul de la valeur final de la couleur pour l'objet
-	vec3 color = ((uKd / PI) * (1.0 - F) +  vec3(fs));
+	vec3 color = ((uKd / PI));// * (1.0 - F));// +  vec3(fs));
 
 	color = uLightIntensity * color * dot(normal,i);
 	
@@ -165,11 +165,13 @@ float rand()
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-vec3 computeNormal(vec3 normal, float sigma)
+vec3 computeNormal(float sigma)
 {
 	float rand1 = rand();
 	float rand2 = rand(); 
 	float phi = rand1 * 2.0 * PI;
+	//probleme niveau de theta
+	// cos theta toujours = 1
 	float theta = atan(sqrt(-square(sigma) * log(1.0-rand2)));
 	vec3 m = vec3(0.0);
 	m.x = sin(theta) * cos (phi);
@@ -182,41 +184,50 @@ vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float s
 {
 	float pdf_sum = 0.0;
 	vec3 color = vec3(0.0);
-	for(int k = 0; k < 100 ; k++)
+	const int N = 1;
+	for(int k = 0; k < N ; k++)
 	{
-		vec3 m = normalize(computeNormal(normal,sigma));
-		float pdf = beckmann(normal, m, sigma) * dot(normal,m);
 		// Calcul des vecteurs nécessaires plus bas
 		vec3 Vo = normalize(-pos);
-		vec3 i = Vo;
+		vec3 i = normalize(computeNormal(sigma));
+		vec3 i0 = vec3(1,0,0);
+		if(dot(i0,normal)>0.8)
+		{
+			i0 = vec3(0,1,0);
+		}
+
+		vec3 j = cross(i0,normal);
+		vec3 i1 = cross(j,normal);
+		mat3 Mrl = mat3(0.0);
+		Mrl[0] = i1;
+		Mrl[1] = j;
+		//probleme ici genere un vecteur qui est toujours égal à la normal
+		//du au vecteur normalisé qui est égal à 0,0,1
+		//pourtant en mettant m.z
+		Mrl[2] = normal;
+
+		//i = Mrl * i;
+		vec3 m = normalize(i+Vo);
 
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F = fresnelFactor(i,m,ni);
 		float D = beckmann(normal,m,sigma);
 		float G = g(normal,m,i,Vo);
+		float pdf = D * dot(normal,m);
 		float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
 		// Calcul de la valeur final de la couleur pour l'objet
-		vec3 color1 = vec3(fs);
+		vec3 color1 = (uKd / PI) * (1.0 - F);// + vec3(fs);
 
-		// vec3 i0 = vec3(1,0,0);
-		// if(dot(i0,normal)>0.8)
-		// {
-		// 	i0 = vec3(0,1,0);
-		// }
-
-		// vec3 j = cross(i0,normal);
-		// vec3 i1 = cross(j,normal);
-		// mat3 Mrl = mat3(0.0);
-		// Mrl[0] = i1;
-		// Mrl[1] = j;
-		// Mrl[2] = normal;
 		
-		vec4 mColor = vec4(textureCube(uSampler,adaptDir(m)).rgb,1.0);
-		color1 = color1 * dot(m,i);
-		color += color1/100.0;
+		vec3 mColor = textureCube(uSampler,adaptDir(invRotMatrix* vec4(i,1.0))).rgb;
+
+		color1 = 2.0 * color1 * abs(dot(i,normal));
+		//color1 = vec3(pdf) ;
+		//color1 = i ;
+		color += i;
 	}
-	return vec4(color,1.0);
+	return vec4(color/1.0,1.0);
 }
 
 
