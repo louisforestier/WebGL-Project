@@ -17,7 +17,7 @@ FORESTIER Louis**
 
 ## Fonctionnalités implantés
 
-Dans cette séction, nous allons détailler les fonction implantés dans notre rendu, ils seront classés par jalon.
+Dans cette section, nous allons détailler les fonctionnalités implantées dans notre rendu, elles seront classées par jalon.
 
 ### Jalon 1
 
@@ -33,7 +33,7 @@ Dans cette séction, nous allons détailler les fonction implantés dans notre r
 
 - Possibilité de changer d'objet
 - Possibilité de changer la skybox
-- Possibilité d'avoir un objet réfléchissant un skybox différente que celle de la scène
+- Possibilité d'avoir un objet réfléchissant une skybox différente que celle de la scène
 - Activation de l'extension permettant de gérer les objets avec des maillages composés de plus de 65535 sommets
 
 ## Problème de buffers
@@ -48,7 +48,7 @@ Cependant l'utilisation de UInt sur des ordinateurs peu puissants pourrait cause
 
 ### Code
 
-Pour le glCourseBasis, les changement se résume a deux fonctions :
+Pour le glCourseBasis, les changements se résument à deux fonctions :
 ```js
 function initGL(canvas)
 {
@@ -72,7 +72,7 @@ function initGL(canvas)
 ```
 ```js
 /**
-* affiche l'objet après avoir envoyé les variables à la shader
+* affiche l'objet après avoir envoyé les variables au shader
 */
 draw() {
 	if(this.shader && this.loaded==4 && this.mesh != null) {
@@ -122,8 +122,8 @@ mesh.indexBuffer.numItems = mesh.indices.length;
     - **obj.vs** : vertex shader pour les objets
     - **plane.fs** : fragment shader pour les plans
     - **plane.vs** : vertex shader pour les plans
-    - **wire.fs** : fragment shader pour afficher les triangles d'un objet
-    - **wire.vs** : vertex shader pour afficher les triangles d'un objet
+    - **wire.fs** : fragment shader pour afficher les arêtes des triangles d'un objet
+    - **wire.vs** : vertex shader pour afficher les arêtes des triangles d'un objet
   - *skyboxes*
     - *blue_space* : dossier contenant les textures de la skybox du même nom
     - *lake* : dossier contenant les textures de la skybox du même nom
@@ -132,7 +132,7 @@ mesh.indexBuffer.numItems = mesh.indices.length;
     - *snowy_mountain* : dossier contenant les textures de la skybox du même nom
     - *test* : dossier contenant les textures de la skybox du même nom
   - *src*
-    - **callbacks.js** : Contient toutes les fonctions interagissant avec le fenêtre WebGL
+    - **callbacks.js** : Contient toutes les fonctions interagissant avec la fenêtre WebGL
     - **front.js** : Contient toutes les fonctions interagissant avec la page web en elle même
     - **glCourseBasis.js** : Contient toutes les fonctions permettant de mettre en place l'environnement WebGL
     - **glMatrix.js** : Contient toutes les fonctions permettant d'utiliser des matrices
@@ -140,7 +140,7 @@ mesh.indexBuffer.numItems = mesh.indices.length;
   - **main.css** : le fichier css de la page Web
   - **main.html** : Page web contenant la fenêtre WebGL
 
-Pour les skyboxes, elle sont toute formalisé de la même manière, elle contiennent toutes 6 images réparties de la sorte :
+Pour les skyboxes, elles sont toutes formalisées de la même manière, elles contiennent toutes 6 images réparties de la sorte :
 - pos-x => right
 - neg-x => left
 - pos-y  => top
