@@ -27,7 +27,7 @@ Dans cette section, nous allons détailler les fonctionnalités implantées dans
 
 ### Jalon 2
 
-- Ajout de l'équation de **Cook & Torrence**, avec possibilité de jouer sur la rugosité de l'objet et l'intensité de la lumière
+- Ajout de l'équation de **Cook & Torrance**, avec possibilité de jouer sur la rugosité de l'objet et l'intensité de la lumière
 
 ### Bonus
 
