@@ -182,9 +182,11 @@ vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float s
 {
 	float pdf_sum = 0.0;
 	vec3 color = vec3(0.0);
-	const int N = 1;
-	for(int k = 0; k < N ; k++)
+	int N = 1;
+	for(int k = 0; k < 100 ; k++)
 	{
+		if(k > N)
+			break;
 		// Calcul des vecteurs nécessaires plus bas
 		vec3 Vo = normalize(-pos);
 		vec3 i = normalize(computeNormal(sigma));
