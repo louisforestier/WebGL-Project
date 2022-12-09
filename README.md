@@ -33,6 +33,7 @@ Dans cette section, nous allons détailler les fonctionnalités implantées dans
 
 - Possibilité de changer d'objet
 - Possibilité de changer la skybox
+- Possibilité de désactiver le plan
 - Possibilité d'avoir un objet réfléchissant une skybox différente que celle de la scène
 - Activation de l'extension permettant de gérer les objets avec des maillages composés de plus de 65535 sommets
 
