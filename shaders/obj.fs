@@ -170,11 +170,9 @@ vec3 computeNormal(float sigma)
 	float rand1 = rand();
 	float rand2 = rand(); 
 	float phi = rand1 * 2.0 * PI;
-	//probleme niveau de theta
-	// cos theta toujours = 1
 	float theta = atan(sqrt(-square(sigma) * log(1.0-rand2)));
 	vec3 m = vec3(0.0);
-	m.x = sin(theta) * cos (phi);
+	m.x = sin(theta) * cos(phi);
 	m.y = sin(theta) * sin(phi);
 	m.z = cos(theta);
 	return m;
@@ -201,12 +199,9 @@ vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float s
 		mat3 Mrl = mat3(0.0);
 		Mrl[0] = i1;
 		Mrl[1] = j;
-		//probleme ici genere un vecteur qui est toujours égal à la normal
-		//du au vecteur normalisé qui est égal à 0,0,1
-		//pourtant en mettant m.z
 		Mrl[2] = normal;
 
-		//i = Mrl * i;
+		i = Mrl * i;
 		vec3 m = normalize(i+Vo);
 
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
@@ -217,17 +212,15 @@ vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float s
 		float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
 		// Calcul de la valeur final de la couleur pour l'objet
-		vec3 color1 = (uKd / PI) * (1.0 - F);// + vec3(fs);
+		vec3 color1 = (uKd / PI) * (1.0 - F) + vec3(fs);
 
 		
 		vec3 mColor = textureCube(uSampler,adaptDir(invRotMatrix* vec4(i,1.0))).rgb;
 
-		color1 = 2.0 * color1 * abs(dot(i,normal));
-		//color1 = vec3(pdf) ;
-		//color1 = i ;
-		color += i;
+		color1 = uLightIntensity* mColor * color1 * abs(dot(i,normal));
+		color += color1;
 	}
-	return vec4(color/1.0,1.0);
+	return vec4(color/float(N),1.0);
 }
 
 
