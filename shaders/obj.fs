@@ -98,7 +98,7 @@ vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 
 
 // ======================================================================
-// Jalon 2 : Cook & Torrence
+// Jalon 2 : Cook & Torrance
 // ======================================================================
 
 // Fonction calculant la distribution de Beckmann
@@ -122,7 +122,7 @@ float g(vec3 n, vec3 m, vec3 i, vec3 o)
 	return min(1., min(num1/denom1, num2/denom2));
 }
 
-// Calcul de l'éclairement d'un objet selon Cook & Torrence
+// Calcul de l'éclairement d'un objet selon Cook & Torrance
 // avec 0,0,0 comme position d'une source lumineuse
 vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigma)
 {
