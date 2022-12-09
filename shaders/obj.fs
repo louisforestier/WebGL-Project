@@ -138,7 +138,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
 
     // Calcul de la valeur final de la couleur pour l'objet
-	vec3 color = ((uKd / PI));// * (1.0 - F));// +  vec3(fs));
+	vec3 color = (uKd / PI) * (1.0 - F) +  vec3(fs);
 
 	color = uLightIntensity * color * dot(normal,i);
 	
