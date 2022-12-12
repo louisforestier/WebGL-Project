@@ -11,6 +11,7 @@ uniform float uSigma;
 uniform float uLightIntensity;
 uniform int uShaderState;
 uniform vec3 uKd;
+uniform vec3 uLightPos;
 
 #define AIR_REFRACT_INDEX 1.0
 #define REFLECT 0
@@ -127,7 +128,7 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 {
     // Calcul des vecteurs nécessaires plus bas
 	vec3 Vo = normalize(-pos);
-	vec3 i = Vo;
+	vec3 i = normalize(uLightPos);
 	vec3 m = normalize(i+Vo);
 
     // Calcul de la fonction Fs a partir des fonctions F, D et G

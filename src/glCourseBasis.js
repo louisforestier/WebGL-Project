@@ -13,6 +13,12 @@ var DRAWPLANE = true;
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
+var LIGHT= {};
+
+const LightMode = {
+	Normal:0,
+	Detached:1
+}
 
 /**
  * Enumeration pour décrire le calcul à appliquer dans la shader obj.fs
@@ -231,7 +237,6 @@ class objmesh {
 		loadObjFile(this);
 		loadShaders(this);
 		this.setTexture(this.skyboxName);
-
 	}
 
 	/**
@@ -318,11 +323,13 @@ class objmesh {
 		this.shader.sigma = gl.getUniformLocation(this.shader, "uSigma");
 		gl.uniform1f(this.shader.sigma,this.rugosity);
 		this.shader.lightIntensity = gl.getUniformLocation(this.shader, "uLightIntensity");
-		gl.uniform1f(this.shader.lightIntensity,this.lightIntensity);
+		gl.uniform1f(this.shader.lightIntensity, LIGHT.lightIntensity);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "uKd");
 		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
+		this.shader.Kd = gl.getUniformLocation(this.shader, "uLightPos");
+		gl.uniform3f(this.shader.Kd, LIGHT.position[0], LIGHT.position[1], LIGHT.position[2]);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
@@ -344,6 +351,86 @@ class objmesh {
 	 * affiche l'objet après avoir envoyé les variables à la shader
 	 */
 	 draw() {
+		if(this.shader && this.loaded==4 && this.mesh != null) {
+			this.setShadersParams();
+			this.setMatrixUniforms();
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
+			if(this.mesh.indexBuffer.numItems > USHORT_MAX)
+			{
+				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
+			}
+			else
+			{
+				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+			}
+		}
+	}
+}
+
+// =====================================================
+// LIGHT, lecture fichier obj
+// =====================================================
+
+/**
+ * classe permettant de changer la position de la lumière de la scène, ainsi que de la faire apparaître
+ */
+
+class light {
+	constructor(){
+		this.objName = 'sphere.obj';
+		this.shaderName = 'wire';
+		this.position = [0.1,0.0,0.1]
+		this.loaded = -1;
+		this.shader = null;
+		this.mesh = null;
+		this.lightIntensity = 1.0;
+		this.initAll();
+	}
+
+	/**
+	 * charge la mesh, la shader et la texture
+	 */
+	initAll() {
+		loadObjFile(this);
+		loadShaders(this);
+	}
+
+	/**
+	 * bind la shader de l'objet et sa texture et récupère les handles des attributs et des uniforms
+	 */
+	setShadersParams() {
+		gl.useProgram(this.shader);
+		this.shader.vAttrib = gl.getAttribLocation(this.shader, "aVertexPosition");
+		gl.enableVertexAttribArray(this.shader.vAttrib);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
+		gl.vertexAttribPointer(this.shader.vAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		this.shader.nAttrib = gl.getAttribLocation(this.shader, "aVertexNormal");
+		gl.enableVertexAttribArray(this.shader.nAttrib);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
+		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
+		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
+		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
+	}
+
+	/**
+	 * calcul et envoie les matrices de rotation, modelview et projection
+	 */
+	setMatrixUniforms() {
+		mat4.identity(mvMatrix);
+		mat4.translate(mvMatrix, distCENTER);
+		mat4.multiply(mvMatrix, rotMatrix);
+		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
+		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
+		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
+	}
+
+	/**
+	 * affiche l'objet après avoir envoyé les variables à la shader
+	 */
+	draw() {
 		if(this.shader && this.loaded==4 && this.mesh != null) {
 			this.setShadersParams();
 			this.setMatrixUniforms();
@@ -565,13 +652,15 @@ function webGLStart() {
 
 	initGL(canvas);
 
+	
 	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 	mat4.identity(rotMatrix);
 	mat4.rotate(rotMatrix, rotX, [1, 0, 0]);
 	mat4.rotate(rotMatrix, rotY, [0, 0, 1]);
-
+	
 	distCENTER = vec3.create([0,-0.2,-3]);
 	
+	LIGHT = new light();
 	PLANE = new plane();
 	OBJ1 = new objmesh('sphere.obj');
 	CUBEMAP = new cubemap('lake');
@@ -589,6 +678,7 @@ function drawScene() {
     }
 	OBJ1.draw();
 	CUBEMAP.draw();
+	LIGHT.draw();
 }
 
 
