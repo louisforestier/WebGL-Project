@@ -19,6 +19,10 @@ function readyDocument() {
     // Récupération du slider et de l'input number de l'intensité de la lumière
     var sliderInt = document.getElementById("intensity");
     var outputInt = document.getElementById("valueInt");
+
+    // Récupération du slider et de l'input number du nombre d'échantillons
+    var sliderSamples = document.getElementById("samples");
+    var outputSamples = document.getElementById("valueSamples");
     
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
@@ -76,10 +80,14 @@ function readyDocument() {
         if(this.value == 4 || this.value == 5){
             sliderReg.parentElement.classList.remove("hidden");
             sliderInt.parentElement.classList.remove("hidden");
+            if (this.value == 5) {
+                sliderSamples.parentElement.classList.remove("hidden");
+            }
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
+            sliderSamples.parentElement.classList.remove("hidden");
         }
     });
 
@@ -172,5 +180,21 @@ function readyDocument() {
     outputInt.oninput = function() {
         sliderInt.value = this.value;
         OBJ1.lightIntensity = this.value;
+    }
+
+    // Affecter les valeurs pour le nombre d'échantillons
+    // Affecte au champ nombre la valeur du slider
+    outputSamples.value = sliderSamples.value;
+
+    // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
+    sliderSamples.oninput = function() {
+        outputSamples.value = this.value;
+        NBSAMPLES = this.value;
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    outputSamples.oninput = function() {
+        sliderSamples.value = this.value;
+        NBSAMPLES  = this.value;
     }
 }

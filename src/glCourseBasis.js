@@ -13,6 +13,7 @@ var DRAWPLANE = true;
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
+var NBSAMPLES = 1;
 
 /**
  * Enumeration pour décrire le calcul à appliquer dans la shader obj.fs
@@ -322,6 +323,8 @@ class objmesh {
 		gl.uniform1f(this.shader.lightIntensity,this.lightIntensity);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
+		this.shader.nbSamples = gl.getUniformLocation(this.shader, "uNbSamples");		
+		gl.uniform1i(this.shader.nbSamples,NBSAMPLES);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "uKd");
 		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");

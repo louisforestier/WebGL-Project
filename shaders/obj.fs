@@ -11,6 +11,7 @@ uniform float uSigma;
 uniform float uLightIntensity;
 uniform int uShaderState;
 uniform vec3 uKd;
+uniform int uNbSamples;
 
 #define AIR_REFRACT_INDEX 1.0
 #define REFLECT 0
@@ -41,6 +42,16 @@ vec3 adaptDir(vec4 dir)
 float square(float x)
 {
 	return x * x;
+}
+
+float ddot(vec3 left, vec3 right)
+{
+	return max(0.0,dot(left,right));
+}
+
+float ddot(vec4 left, vec4 right)
+{
+	return max(0.0,dot(left,right));
 }
 
 // ======================================================================
@@ -180,12 +191,11 @@ vec3 computeNormal(float sigma)
 
 vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigma)
 {
-	float pdf_sum = 0.0;
 	vec3 color = vec3(0.0);
 	int N = 1;
 	for(int k = 0; k < 100 ; k++)
 	{
-		if(k > N)
+		if(k > uNbSamples)
 			break;
 		// Calcul des vecteurs nécessaires plus bas
 		vec3 Vo = normalize(-pos);
@@ -203,26 +213,25 @@ vec4 echantillonnage(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float s
 		Mrl[1] = j;
 		Mrl[2] = normal;
 
-		i = Mrl * i;
+		i = normalize(Mrl * i);
 		vec3 m = normalize(i+Vo);
 
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F = fresnelFactor(i,m,ni);
 		float D = beckmann(normal,m,sigma);
 		float G = g(normal,m,i,Vo);
-		float pdf = D * dot(normal,m);
-		float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
+		float pdf = D * ddot(normal,m);
+		float fs = (F * D * G) / (4. * ddot(i,normal) * ddot(Vo,normal)); 
 
 		// Calcul de la valeur final de la couleur pour l'objet
 		vec3 color1 = (uKd / PI) * (1.0 - F) + vec3(fs);
 
-		
 		vec3 mColor = textureCube(uSampler,adaptDir(invRotMatrix* vec4(i,1.0))).rgb;
 
-		color1 = uLightIntensity* mColor * color1 * abs(dot(i,normal));
+		color1 = uLightIntensity* mColor * color1 * ddot(i,normal);
 		color += color1;
 	}
-	return vec4(color/float(N),1.0);
+	return vec4(color/float(uNbSamples),1.0);
 }
 
 
