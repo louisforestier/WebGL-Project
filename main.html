@@ -25,6 +25,7 @@
 
             <input type="checkbox" id="plane" name="plane" checked>
             <label for="plane">Afficher le plan</label>
+
             <button class="accordion">Paramètres de l'objet</button>
             <div class="panel">
                 <h4>Choix de l'objet</h4>
@@ -63,7 +64,6 @@
                     <input type="range" min="0.01" max="0.5" step="0.01" value="0.1" class="slider" id="rugosity">
                     <input type="number" min="0.01" max="0.5" step="0.01" class="sliderVal" id="valueReg">
                 </div>
-
                 <div class="slidecontainer hidden">
                     <p>Intensité de la lumière</p>
                     <input type="range" min="1" max="2" step="0.1" value="1" class="slider" id="intensity">
@@ -94,7 +94,26 @@
                         <option value="blue_space">Blue Space</option>
                         <option value="test">Test</option>
                     </select>
-                <div>
+                </div>
+            </div>
+
+            <button class="accordion">Paramètres de la lumière</button>
+            <div class="panel">
+                <h3>Position de la lumière</h3>
+                <input type="checkbox" id="light" name="light">
+                <label for="light">Détacher la lumière de la caméra</label>
+                <div id="LightPosParam" class="hidden">
+                    <div class="slidecontainer">
+                        <p>Position</p>
+                        <input type="range" min="0" max="6.28" step="0.01" value="3.14" class="slider" id="lightPosition">
+                    </div>
+                    <div class="slidecontainer">
+                        <p>Distance à l'objet</p>
+                        <input type="range" min="2" max="10" step="0.1" value="6" class="slider" id="lightPosition">
+                    </div>
+                    <input type="checkbox" id="light" name="light">
+                    <label for="light">Fixer la lumière dans l'espace</label>       
+                </div>
             </div>
         </aside>
     </body>
