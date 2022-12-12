@@ -32,7 +32,8 @@ function readyDocument() {
     
     // Récupération de des checkbox
     var checkboxWS = document.getElementById("weirdSkybox");
-    var checkboxP = document.getElementById("plane")
+    var checkboxP = document.getElementById("plane");
+    var checkboxL = document.getElementById("light");
     
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
     for(var i = 0; i < acc.length; i++){
@@ -109,6 +110,17 @@ function readyDocument() {
         DRAWPLANE = this.checked;
     });
 
+    // Code éxécuter à chaque fois que la checkbox "Détacher la lumière de la caméra" est cliqué
+    checkboxL.addEventListener("click", function() {
+        var div = document.getElementById("LightPosParam");
+        if(this.checked){
+            div.classList.remove("hidden");
+        }
+        else{
+            div.classList.add("hidden");
+        }
+    });
+
     // Code éxécuter à chaque fois que l'on change la valeur de la skybox
     skybox.addEventListener("change", function() {
         console.log(this.value)
@@ -165,12 +177,12 @@ function readyDocument() {
     // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
     sliderInt.oninput = function() {
         outputInt.value = this.value;
-        OBJ1.lightIntensity = this.value;
+        LIGHT.lightIntensity = this.value;
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
     outputInt.oninput = function() {
         sliderInt.value = this.value;
-        OBJ1.lightIntensity = this.value;
+        LIGHT.lightIntensity = this.value;
     }
 }
