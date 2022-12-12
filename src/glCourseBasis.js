@@ -15,11 +15,6 @@ var PLANE = null;
 var CUBEMAP = null;
 var LIGHT= {};
 
-const LightMode = {
-	Normal:0,
-	Detached:1
-}
-
 /**
  * Enumeration pour décrire le calcul à appliquer dans la shader obj.fs
  */
@@ -379,7 +374,7 @@ class light {
 	constructor(){
 		this.objName = 'sphere.obj';
 		this.shaderName = 'wire';
-		this.position = [0.1,0.0,0.1]
+		this.position = [0.,0.,0.1]
 		this.loaded = -1;
 		this.shader = null;
 		this.mesh = null;

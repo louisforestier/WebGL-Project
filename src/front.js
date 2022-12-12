@@ -19,6 +19,9 @@ function readyDocument() {
     // Récupération du slider et de l'input number de l'intensité de la lumière
     var sliderInt = document.getElementById("intensity");
     var outputInt = document.getElementById("valueInt");
+
+    // Récupération du slider de la position de la lumière
+    var sliderLightPos = document.getElementById("lightPosition");
     
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
@@ -115,8 +118,12 @@ function readyDocument() {
         var div = document.getElementById("LightPosParam");
         if(this.checked){
             div.classList.remove("hidden");
+            LIGHT.position[0] = Math.cos(sliderLightPos.value);
+            LIGHT.position[1] = Math.sin(sliderLightPos.value);
         }
         else{
+            LIGHT.position[0] = 0.;
+            LIGHT.position[1] = 0.;
             div.classList.add("hidden");
         }
     });
@@ -184,5 +191,13 @@ function readyDocument() {
     outputInt.oninput = function() {
         sliderInt.value = this.value;
         LIGHT.lightIntensity = this.value;
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    sliderLightPos .oninput = function() {
+        if(checkboxL.checked){
+            LIGHT.position[0] = Math.cos(this.value);
+            LIGHT.position[1] = Math.sin(this.value);
+        }
     }
 }
