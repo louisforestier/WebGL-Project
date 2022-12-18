@@ -323,8 +323,14 @@ class objmesh {
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "uKd");
 		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
-		this.shader.Kd = gl.getUniformLocation(this.shader, "uLightPos");
-		gl.uniform3f(this.shader.Kd, LIGHT.position[0], LIGHT.position[1], LIGHT.position[2]);
+
+		mat4.identity(mvMatrix);
+		mat4.translate(mvMatrix, distCENTER);
+		mat4.multiply(mvMatrix, rotMatrix);
+		var lightpos = [];
+		mat4.multiplyVec3(mvMatrix,LIGHT.position,lightpos)
+		this.shader.lightPos = gl.getUniformLocation(this.shader, "uLightPos");
+		gl.uniform3f(this.shader.lightPos, lightpos[0], lightpos[1], lightpos[2]);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
@@ -400,12 +406,6 @@ class light {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
 		gl.vertexAttribPointer(this.shader.vAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		this.shader.nAttrib = gl.getAttribLocation(this.shader, "aVertexNormal");
-		gl.enableVertexAttribArray(this.shader.nAttrib);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
-		gl.vertexAttribPointer(this.shader.nAttrib, this.mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
 		this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 		this.shader.pMatrixUniform = gl.getUniformLocation(this.shader, "uPMatrix");
 	}
@@ -414,10 +414,13 @@ class light {
 	 * calcul et envoie les matrices de rotation, modelview et projection
 	 */
 	setMatrixUniforms() {
+
 		mat4.identity(mvMatrix);
 		mat4.translate(mvMatrix, distCENTER);
 		mat4.multiply(mvMatrix, rotMatrix);
-		gl.uniformMatrix4fv(this.shader.rMatrixUniform, false, rotMatrix);
+
+		mat4.translate(mvMatrix,this.position);
+		mat4.scale(mvMatrix,[0.3,0.3,0.3]);
 		gl.uniformMatrix4fv(this.shader.mvMatrixUniform, false, mvMatrix);
 		gl.uniformMatrix4fv(this.shader.pMatrixUniform, false, pMatrix);
 	}
@@ -432,11 +435,11 @@ class light {
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.indexBuffer);
 			if(this.mesh.indexBuffer.numItems > USHORT_MAX)
 			{
-				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
+				gl.drawElements(gl.LINE_STRIP, this.mesh.indexBuffer.numItems, gl.UNSIGNED_INT, 0);
 			}
 			else
 			{
-				gl.drawElements(gl.TRIANGLES, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+				gl.drawElements(gl.LINE_STRIP, this.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 			}
 		}
 	}

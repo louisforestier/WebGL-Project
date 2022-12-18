@@ -43,6 +43,17 @@ float square(float x)
 	return x * x;
 }
 
+float ddot(vec3 left, vec3 right)
+{
+	return max(0.0,dot(left,right));
+}
+
+float ddot(vec4 left, vec4 right)
+{
+	return max(0.0,dot(left,right));
+}
+
+
 // ======================================================================
 // Jalon 1 : Skybox, Mirroir, Transparence et Fresnel
 // ======================================================================
@@ -50,7 +61,7 @@ float square(float x)
 // Calcul le facteur de fresnel
 float fresnelFactor(vec3 i, vec3 m, float ni)
 {
-	float c = abs(dot(i,m));
+	float c = ddot(i,m);
 	float g = sqrt(ni*ni+c*c-1.0);
 	float f = 0.5 * square(g-c)/square(g+c) * ( 1.0 + (square(c * (g+c) - 1.0)/square(c * (g-c) + 1.0)));
 	return f;
@@ -104,7 +115,7 @@ vec4 fresnelEffect(vec3 pos, vec3 normal, mat4 invRotMatrix, float ind1, float i
 // Fonction calculant la distribution de Beckmann
 float beckmann(vec3 n, vec3 m, float sigma)
 {
-	float cosinus = dot(n,m);
+	float cosinus = ddot(n,m);
 	float denominateur = PI * square(sigma) *square(square(cosinus));
 	float sinus = sqrt(1.0 - square(cosinus));
 	float tangente = sinus / cosinus;
@@ -115,10 +126,10 @@ float beckmann(vec3 n, vec3 m, float sigma)
 // Fonction calculant l'ombrage et le Masquage
 float g(vec3 n, vec3 m, vec3 i, vec3 o)
 {
-	float num1 = 2. * dot(n, m) * dot(n, o);
-	float num2 = 2. * dot(n, m) * dot(n, i);
-	float denom1 = dot(o, m);
-	float denom2 = dot(i, m);
+	float num1 = 2. * ddot(n, m) * ddot(n, o);
+	float num2 = 2. * ddot(n, m) * ddot(n, i);
+	float denom1 = ddot(o, m);
+	float denom2 = ddot(i, m);
 	return min(1., min(num1/denom1, num2/denom2));
 }
 
@@ -128,19 +139,19 @@ vec4 cookTorrance(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigm
 {
     // Calcul des vecteurs nécessaires plus bas
 	vec3 Vo = normalize(-pos);
-	vec3 i = normalize(uLightPos);
+	vec3 i = normalize(uLightPos - pos);
 	vec3 m = normalize(i+Vo);
 
     // Calcul de la fonction Fs a partir des fonctions F, D et G
 	float F = fresnelFactor(i,m,ni);
 	float D = beckmann(normal,m,sigma);
 	float G = g(normal,m,i,Vo);
-	float fs = (F * D * G) / (4. * abs(dot(i,normal)) * abs(dot(Vo,normal))); 
+	float fs = (F * D * G) / (4. * ddot(i,normal) * ddot(Vo,normal)); 
 
     // Calcul de la valeur final de la couleur pour l'objet
-	vec3 color = ((uKd / PI) * (1.0 - F) +  vec3(fs));
+	vec3 fr = ((uKd / PI) * (1.0 - F) +  vec3(fs));
 
-	color = uLightIntensity * color * dot(normal,i);
+	vec3 color = uLightIntensity * fr * ddot(normal,i);
 	
 	return vec4(color,1.0);
 }

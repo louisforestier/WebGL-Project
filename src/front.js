@@ -122,8 +122,9 @@ function readyDocument() {
             LIGHT.position[1] = Math.sin(sliderLightPos.value);
         }
         else{
-            LIGHT.position[0] = 0.;
-            LIGHT.position[1] = 0.;
+            LIGHT.position[0] = 0.0;
+            LIGHT.position[1] = 0.0;
+            LIGHT.position[2] = 0.0;
             div.classList.add("hidden");
         }
     });
