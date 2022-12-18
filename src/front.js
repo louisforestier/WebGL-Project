@@ -118,6 +118,7 @@ function readyDocument() {
         var div = document.getElementById("LightPosParam");
         if(this.checked){
             div.classList.remove("hidden");
+            LIGHT.detached = true;
             LIGHT.position[0] = Math.cos(sliderLightPos.value);
             LIGHT.position[1] = Math.sin(sliderLightPos.value);
         }
@@ -125,6 +126,7 @@ function readyDocument() {
             LIGHT.position[0] = 0.0;
             LIGHT.position[1] = 0.0;
             LIGHT.position[2] = 0.0;
+            LIGHT.detached = false
             div.classList.add("hidden");
         }
     });

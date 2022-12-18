@@ -323,12 +323,14 @@ class objmesh {
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "uKd");
 		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
-
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, distCENTER);
-		mat4.multiply(mvMatrix, rotMatrix);
-		var lightpos = [];
-		mat4.multiplyVec3(mvMatrix,LIGHT.position,lightpos)
+		
+		var lightpos = [0.,0.,0.];
+		if(LIGHT.detached) {
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix, distCENTER);
+			mat4.multiply(mvMatrix, rotMatrix);
+			mat4.multiplyVec3(mvMatrix,LIGHT.position,lightpos)
+		}
 		this.shader.lightPos = gl.getUniformLocation(this.shader, "uLightPos");
 		gl.uniform3f(this.shader.lightPos, lightpos[0], lightpos[1], lightpos[2]);
 		this.shader.rMatrixUniform = gl.getUniformLocation(this.shader, "uRMatrix");
@@ -380,11 +382,12 @@ class light {
 	constructor(){
 		this.objName = 'sphere.obj';
 		this.shaderName = 'wire';
-		this.position = [0.,0.,0.1]
+		this.position = [0.,0.,0.]
 		this.loaded = -1;
 		this.shader = null;
 		this.mesh = null;
 		this.lightIntensity = 1.0;
+		this.detached = false;
 		this.initAll();
 	}
 
