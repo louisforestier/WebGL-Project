@@ -21,7 +21,11 @@ function readyDocument() {
     var outputInt = document.getElementById("valueInt");
 
     // Récupération du slider de la position de la lumière
-    var sliderLightPos = document.getElementById("lightPosition");
+    var sliderLightPosXZ = document.getElementById("lightPositionXZ");
+    var sliderLightPosXY = document.getElementById("lightPositionXY");
+
+    // Récupération de l'accordion contenant les options de la lumière
+    var accordion = document.getElementById("lightParam");
     
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
@@ -80,10 +84,16 @@ function readyDocument() {
         if(this.value == 4){
             sliderReg.parentElement.classList.remove("hidden");
             sliderInt.parentElement.classList.remove("hidden");
+            accordion.classList.remove("hidden");
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
+            accordion.click();
+            accordion.classList.add("hidden");
+            if(checkboxL.checked){
+                checkboxL.click();
+            }
         }
     });
 
@@ -118,9 +128,10 @@ function readyDocument() {
         var div = document.getElementById("LightPosParam");
         if(this.checked){
             div.classList.remove("hidden");
+            LIGHT.position[0] = Math.sin(sliderLightPosXZ.value) * Math.cos(sliderLightPosXY.value);
+            LIGHT.position[1] = Math.sin(sliderLightPosXZ.value) * Math.sin(sliderLightPosXY.value);
+            LIGHT.position[2] = Math.cos(sliderLightPosXZ.value);
             LIGHT.detached = true;
-            LIGHT.position[0] = Math.cos(sliderLightPos.value);
-            LIGHT.position[1] = Math.sin(sliderLightPos.value);
         }
         else{
             LIGHT.position[0] = 0.0;
@@ -197,10 +208,20 @@ function readyDocument() {
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
-    sliderLightPos .oninput = function() {
+    sliderLightPosXZ .oninput = function() {
         if(checkboxL.checked){
-            LIGHT.position[0] = Math.cos(this.value);
-            LIGHT.position[1] = Math.sin(this.value);
+            LIGHT.position[0] = Math.sin(this.value) * Math.cos(sliderLightPosXY.value);
+            LIGHT.position[1] = Math.sin(this.value) * Math.sin(sliderLightPosXY.value);
+            LIGHT.position[2] = Math.cos(this.value);
+        }
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    sliderLightPosXY .oninput = function() {
+        if(checkboxL.checked){
+            LIGHT.position[0] = Math.sin(sliderLightPosXZ.value) * Math.cos(this.value);
+            LIGHT.position[1] = Math.sin(sliderLightPosXZ.value) * Math.sin(this.value);
+            LIGHT.position[2] = Math.cos(sliderLightPosXZ.value);
         }
     }
 }

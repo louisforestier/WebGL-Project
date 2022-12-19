@@ -10,6 +10,7 @@ var distCENTER;
 
 var USHORT_MAX = 65535;
 var DRAWPLANE = true;
+var DRAWLIGHT = false;
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
@@ -679,7 +680,9 @@ function drawScene() {
     }
 	OBJ1.draw();
 	CUBEMAP.draw();
-	LIGHT.draw();
+	if(LIGHT.detached){
+		LIGHT.draw();
+	}
 }
 
 
