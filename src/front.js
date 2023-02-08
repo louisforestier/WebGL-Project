@@ -4,6 +4,17 @@ function getColor(value){
                      parseInt(value.substring(5), 16)/255];
 }
 
+function hideAccord(accordion){
+    var checkboxL = document.getElementById("light");
+    if(checkboxL.checked){
+        checkboxL.click();
+    }
+    if(accordion.classList.contains("active")){
+        accordion.click();
+    }
+    accordion.classList.add("hidden");
+}
+
 function readyDocument() {
     // Récupération des accordions de la page web
     var acc = document.getElementsByClassName("accordion");
@@ -20,6 +31,9 @@ function readyDocument() {
     var sliderInt = document.getElementById("intensity");
     var outputInt = document.getElementById("valueInt");
 
+    // Récupération du slider et de l'input number du nombre d'échantillons
+    var sliderSamples = document.getElementById("samples");
+    var outputSamples = document.getElementById("valueSamples");
     // Récupération du slider de la position de la lumière
     var sliderLightPosXZ = document.getElementById("lightPositionXZ");
     var sliderLightPosXY = document.getElementById("lightPositionXY");
@@ -75,22 +89,31 @@ function readyDocument() {
     // Code éxécuter à chaque changement de la liste déroulante des shaders
     shader.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
-        if(this.value == 2 || this.value == 1 || this.value == 4){
+        
+        if(this.value == 2 || this.value == 1 || this.value >= 4){
             sliderRef.parentElement.classList.remove("hidden");
         }
         else {
             sliderRef.parentElement.classList.add("hidden");
         }
-        if(this.value == 4){
+
+        if(this.value >= 4){
             sliderReg.parentElement.classList.remove("hidden");
             sliderInt.parentElement.classList.remove("hidden");
-            accordion.classList.remove("hidden");
+            if (this.value >= 5) {
+                sliderSamples.parentElement.classList.remove("hidden");
+                hideAccord(accordion);
+            }
+            else{
+                sliderSamples.parentElement.classList.add("hidden");
+                accordion.classList.remove("hidden");
+            }
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
-            accordion.click();
-            accordion.classList.add("hidden");
+            sliderSamples.parentElement.classList.add("hidden");
+            hideAccord(accordion);
             if(checkboxL.checked){
                 checkboxL.click();
             }
@@ -223,5 +246,21 @@ function readyDocument() {
             LIGHT.position[1] = Math.sin(sliderLightPosXZ.value) * Math.sin(this.value);
             LIGHT.position[2] = Math.cos(sliderLightPosXZ.value);
         }
+    }
+
+    // Affecter les valeurs pour le nombre d'échantillons
+    // Affecte au champ nombre la valeur du slider
+    outputSamples.value = sliderSamples.value;
+
+    // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
+    sliderSamples.oninput = function() {
+        outputSamples.value = this.value;
+        NBSAMPLES = this.value;
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    outputSamples.oninput = function() {
+        sliderSamples.value = this.value;
+        NBSAMPLES  = this.value;
     }
 }

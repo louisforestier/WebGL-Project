@@ -14,6 +14,7 @@ var DRAWLIGHT = false;
 var OBJ1 = null;
 var PLANE = null;
 var CUBEMAP = null;
+var NBSAMPLES = 1;
 var LIGHT= {};
 
 /**
@@ -24,7 +25,9 @@ const ShaderState = {
 	Refract:1,
 	Fresnel:2,
 	Color:3,
-	CookTorrance:4
+	CookTorrance:4,
+	Echantillonnage:5,
+  MiroirDepoli:6
 };
 
 // =====================================================
@@ -220,7 +223,7 @@ class objmesh {
 		this.refractIndex = 1.52;
 		this.rugosity = 0.1;
 		this.lightIntensity = 1.0;
-		this.shaderState = ShaderState.Fresnel;
+		this.shaderState = ShaderState.MiroirDepoli;
 		this.texture = 0;
 		this.color = [0.8,0.4,0.4];
 		this.initAll();
@@ -322,6 +325,8 @@ class objmesh {
 		gl.uniform1f(this.shader.lightIntensity, LIGHT.lightIntensity);
 		this.shader.shaderState = gl.getUniformLocation(this.shader, "uShaderState");		
 		gl.uniform1i(this.shader.shaderState,this.shaderState);
+		this.shader.nbSamples = gl.getUniformLocation(this.shader, "uNbSamples");		
+		gl.uniform1i(this.shader.nbSamples,NBSAMPLES);
 		this.shader.Kd = gl.getUniformLocation(this.shader, "uKd");
 		gl.uniform3f(this.shader.Kd, this.color[0], this.color[1], this.color[2]);
 		
