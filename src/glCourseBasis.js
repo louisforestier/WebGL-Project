@@ -24,7 +24,8 @@ const ShaderState = {
 	Fresnel:2,
 	Color:3,
 	CookTorrance:4,
-	Echantillonnage:5
+	Echantillonnage:5,
+  MiroirDepoli:6
 };
 
 // =====================================================
@@ -220,7 +221,7 @@ class objmesh {
 		this.refractIndex = 1.52;
 		this.rugosity = 0.1;
 		this.lightIntensity = 1.0;
-		this.shaderState = ShaderState.Echantillonnage;
+		this.shaderState = ShaderState.MiroirDepoli;
 		this.texture = 0;
 		this.color = [0.8,0.4,0.4];
 		this.initAll();
