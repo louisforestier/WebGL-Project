@@ -91,18 +91,24 @@ function readyDocument() {
             sliderInt.parentElement.classList.remove("hidden");
             if (this.value >= 5) {
                 sliderSamples.parentElement.classList.remove("hidden");
+                accordion.classList.add("hidden");
+                if(accordion.classList.contains("active")){
+                  accordion.click();
+                }
             }
             else{
                 sliderSamples.parentElement.classList.add("hidden");
+                accordion.classList.remove("hidden");
             }
-            accordion.classList.remove("hidden");
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
             sliderSamples.parentElement.classList.add("hidden");
-            accordion.click();
             accordion.classList.add("hidden");
+            if(accordion.classList.contains("active")){
+              accordion.click();
+            }
             if(checkboxL.checked){
                 checkboxL.click();
             }
