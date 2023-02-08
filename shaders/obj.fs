@@ -45,11 +45,13 @@ float square(float x)
 	return x*x;
 }
 
+//renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
 float ddot(vec3 left,vec3 right)
 {
 	return max(0.,dot(left,right));
 }
 
+//renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
 float ddot(vec4 left,vec4 right)
 {
 	return max(0.,dot(left,right));
@@ -160,9 +162,8 @@ vec4 cookTorrance(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 // Jalon 3 : Echantillonnage d'importancce
 // ======================================================================
 
-//utiliser le temps + randconst pour la seed, en donnant le temps en uniform
-
 float RAND_CONST=0.;
+//Génère un nombre aléatoire entre 0 et 1
 float rand()
 {
 	vec2 co=(invRotMatrix*gl_FragCoord).xy;
@@ -172,6 +173,7 @@ float rand()
 	return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453);
 }
 
+//Calcule la normale selon la pdf en fonction de sigma (et de 2 valeurs aléatoires)
 vec3 computeNormal(float sigma)
 {
 	float phi=rand()*2.*PI;
@@ -183,125 +185,152 @@ vec3 computeNormal(float sigma)
 	return m;
 }
 
-vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+//Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance
+vec4 echantillonnagePasOpti(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
-	vec3 color=vec3(0.);
+	vec3 Lo=vec3(0.);
+	//100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
-		if(k>=uNbSamples)
-		break;
-		// Calcul des vecteurs nécessaires plus bas
+		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		if(k>=uNbSamples) 
+			break;
+		
 		vec3 Vo=normalize(-pos);
-		vec3 m=normalize(computeNormal(sigma));
+		vec3 m=computeNormal(sigma);
+		//Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
 			i0=vec3(0,1,0);
 		}
-		
 		vec3 j=cross(i0,normal);
 		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(0.);
-		Mrl[0]=i1;
-		Mrl[1]=j;
-		Mrl[2]=normal;
+		mat3 Mrl=mat3(i1,j,normal);
 		
 		m=normalize(Mrl*m);
 		vec3 i=reflect(-Vo,m);
-		float test=ddot(i,normal);
+		float test=ddot(normal,m);
+		if(test == 0.0)
+			continue;
 		
-		// // Calcul de la fonction Fs a partir des fonctions F, D et G
+		//Calcul de la brdf à partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
 		float D=beckmann(normal,m,sigma);
 		float G=g(normal,m,i,Vo);
 		float pdf=D*ddot(normal,m);
-		float fs=(F*D*G)/(4.*ddot(i,normal)*ddot(Vo,normal));
-		
+		float brdf=(F*D*G)/(4.*ddot(i,normal)*ddot(Vo,normal));
+		float iDotn = ddot(i,normal);
 		vec3 Li=vec3(0.);
-		//if(test>0.)
-			Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
-		color+=Li*fs*ddot(i,normal)/pdf;
+		Lo+=Li*brdf*iDotn/pdf;
 	}
-	return vec4(color/float(uNbSamples),1.);
+	return vec4(Lo/float(uNbSamples),1.);
 }
 
-vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+// Fonction calculant la distribution de Beckmann de manière "optimisée"
+float beckmannOpti(float nDotm,float sigma)
 {
-	vec3 color=vec3(0.);
+	float sigma2 = sigma*sigma;
+	float nDotm2 = nDotm * nDotm;
+	float denominateur=PI*sigma2*(nDotm2*nDotm2);
+	float sinus=sqrt(1.-nDotm2);
+	float tangente=sinus/nDotm;
+	float exposant=-(square(tangente))/(2.*sigma2);
+	return exp(exposant)/denominateur;
+}
+
+// Fonction calculant l'ombrage et le Masquage de manière "optimisée"
+float gOpti(float nDotm,float iDotn,float oDotn,float oDotm,float iDotm)
+{
+	float nDotm2 = nDotm * 2.0;
+	return min(1.,min(nDotm2 * oDotn / oDotm, nDotm2 * iDotn / iDotm));
+}
+
+//Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance de manière "optimisée"
+vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+{
+	vec3 Lo=vec3(0.);
+	//100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
+		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
 		if(k>=uNbSamples)
-		break;
-		// Calcul des vecteurs nécessaires plus bas
+			break;
+		
 		vec3 Vo=normalize(-pos);
-		vec3 m=normalize(computeNormal(sigma));
+		vec3 m=computeNormal(sigma);
+
+		//Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
 			i0=vec3(0,1,0);
 		}
-		
 		vec3 j=cross(i0,normal);
 		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(0.);
-		Mrl[0]=i1;
-		Mrl[1]=j;
-		Mrl[2]=normal;
+		mat3 Mrl=mat3(i1,j,normal);
+		
+		m=normalize(Mrl*m);
+		vec3 i=reflect(-Vo,m);
+		float nDotm = ddot(normal,m);
+		float iDotn = ddot(i,normal);
+		float oDotn = ddot(Vo,normal);
+		//pour éviter les divisions par 0
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
+			continue;
+		
+		// // Calcul de la fonction Fs a partir des fonctions F, D et G
+		float F=fresnelFactor(i,m,ni);
+		float D=beckmannOpti(nDotm,sigma);
+		float G=gOpti(nDotm,iDotn, oDotn, ddot(Vo,m), ddot(i,m));
+		//D a été supprimé du calcul de pdf et brdf par simplification
+		float pdf=nDotm;
+		float brdf=(F*G)/(4.*iDotn*oDotn);
+		vec3 Li=vec3(0.);
+		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		
+		Lo+=Li*brdf*iDotn/pdf;
+	}
+	return vec4(Lo/float(uNbSamples),1.);
+}
+
+
+//Simule un miroir dépoli en considérant les microfacettes comme des miroirs, plus ou moins dépoli en fonction de sigma 
+vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
+{
+	vec3 Lo=vec3(0.);
+	//100 échantillons au maximum
+	for(int k=0;k<100;k++)
+	{
+		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		if(k>=uNbSamples)
+			break;
+
+		vec3 Vo=normalize(-pos);
+		vec3 m=computeNormal(sigma);
+
+		//Calcul de la matrice de rotation locale
+		vec3 i0=vec3(1,0,0);
+		if(dot(i0,normal)>.8)
+		{
+			i0=vec3(0,1,0);
+		}
+		vec3 j=cross(i0,normal);
+		vec3 i1=cross(j,normal);
+		mat3 Mrl=mat3(i1,j,normal);
 		
 		m=normalize(Mrl*m);
 		vec3 i=reflect(-Vo,m);
 		
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
-		color += Li;
+		Lo += Li;
 	}
-	return vec4(color/float(uNbSamples),1.);
+	return vec4(Lo/float(uNbSamples),1.);
 }
 
-// vec4 echantillonnage_opti(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigma)
-// {
-	// 	vec3 color = vec3(0.0);
-	// 	int N = 1;
-	// 	for(int k = 0; k < 100 ; k++)
-	// 	{
-		// 		if(k > uNbSamples)
-		// 			break;
-		// 		// Calcul des vecteurs nécessaires plus bas
-		// 		vec3 Vo = normalize(-pos);
-		// 		vec3 i = normalize(computeI(sigma));
-		// 		vec3 i0 = vec3(1,0,0);
-		// 		if(dot(i0,normal)>0.8)
-		// 		{
-			// 			i0 = vec3(0,1,0);
-		// 		}
-		
-		// 		vec3 j = cross(i0,normal);
-		// 		vec3 i1 = cross(j,normal);
-		// 		mat3 Mrl = mat3(0.0);
-		// 		Mrl[0] = i1;
-		// 		Mrl[1] = j;
-		// 		Mrl[2] = normal;
-		
-		// 		i = normalize(Mrl * i);
-		// 		vec3 m = normalize(i+Vo);
-		
-		// 		// Calcul de la fonction Fs a partir des fonctions F, D et G
-		// 		float F = fresnelFactor(i,m,ni);
-		// 		float D = beckmann(normal,m,sigma);
-		// 		float G = g(normal,m,i,Vo);
-		// 		float pdf = D * ddot(normal,m);
-		// 		float fs = (F * D * G) / (4. * ddot(i,normal) * ddot(Vo,normal));
-		
-		// 		// Calcul de la valeur final de la couleur pour l'objet
-		// 		//vec3 fr = (uKd / PI) * (1.0 - F) + vec3(fs);
-		
-		// 		vec3 Li = textureCube(uSampler,adaptDir(invRotMatrix* vec4(i,1.0))).rgb;
-		
-		// 		color += Li * fs * ddot(i,normal);;
-	// 	}
-	// 	return vec4(color/float(uNbSamples),1.0);
-// }
 
 // ======================================================================
 // Main du Shader
@@ -330,7 +359,7 @@ void main(void)
 		col=echantillonnage(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
 	}
   else if(uShaderState==MIROIRDEPOLI){
-    col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+    col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
   }
 	else
 	{
