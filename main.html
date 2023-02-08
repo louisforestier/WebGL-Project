@@ -48,30 +48,31 @@
                 <h4>Choix du shader</h4>
                 <select id="shaderChoice" name="shaderChoice" value="Fresnel">
                     <option value="3">Classic</option>
-                    <option value="2" >Fresnel</option>
+                    <option value="2">Fresnel</option>
                     <option value="0">Reflexion</option>
                     <option value="1">Refraction</option>
                     <option value="4">Cook & Torrance</option>
-                    <option value="5"selected="true">Echantillonnage d'importance</option>
+                    <option value="5" selected="true">Echantillonnage d'importance</option>
+                    <option value="6">Miroir Dépoli</option>
                 </select>
                 <div class="slidecontainer">
                     <p>Indice de réfraction</p>
                     <input type="range" min="1" max="4.1" step="0.01" value="1.52" class="slider" id="refractIndex">
                     <input type="number" min="1" max="4.1" step="0.01" class="sliderVal" id="valueRef">
                 </div>
-                <div class="slidecontainer hidden">
+                <div class="slidecontainer">
                     <p>Rugosité</p>
                     <input type="range" min="0.01" max="0.5" step="0.01" value="0.1" class="slider" id="rugosity">
                     <input type="number" min="0.01" max="0.5" step="0.01" class="sliderVal" id="valueReg">
                 </div>
 
-                <div class="slidecontainer hidden">
+                <div class="slidecontainer">
                     <p>Intensité de la lumière</p>
                     <input type="range" min="1" max="2" step="0.1" value="1" class="slider" id="intensity">
                     <input type="number" min="1" max="2" step="0.1" class="sliderVal" id="valueInt">
                 </div>
 
-                <div class="slidecontainer echantillonnage">
+                <div class="slidecontainer">
                     <p>Nombre d'échantillons</p>
                     <input type="range" min="1" max="100" step="1" value="1" class="slider" id="samples">
                     <input type="number" min="1" max="100" step="1" class="sliderVal" id="valueSamples">

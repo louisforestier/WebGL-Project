@@ -19,6 +19,7 @@ uniform int uNbSamples;
 #define FRESNEL 2
 #define COOKTORRANCE 4
 #define ECHANTILLONNAGE 5
+#define MIROIRDEPOLI 6
 
 #define PI 3.1415926538
 
@@ -225,6 +226,39 @@ vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma
 	return vec4(color/float(uNbSamples),1.);
 }
 
+vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+{
+	vec3 color=vec3(0.);
+	for(int k=0;k<100;k++)
+	{
+		if(k>=uNbSamples)
+		break;
+		// Calcul des vecteurs nécessaires plus bas
+		vec3 Vo=normalize(-pos);
+		vec3 m=normalize(computeNormal(sigma));
+		vec3 i0=vec3(1,0,0);
+		if(dot(i0,normal)>.8)
+		{
+			i0=vec3(0,1,0);
+		}
+		
+		vec3 j=cross(i0,normal);
+		vec3 i1=cross(j,normal);
+		mat3 Mrl=mat3(0.);
+		Mrl[0]=i1;
+		Mrl[1]=j;
+		Mrl[2]=normal;
+		
+		m=normalize(Mrl*m);
+		vec3 i=reflect(-Vo,m);
+		
+		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		
+		color += Li;
+	}
+	return vec4(color/float(uNbSamples),1.);
+}
+
 // vec4 echantillonnage_opti(vec3 pos, vec3 normal, mat4 invRotMatrix, float ni, float sigma)
 // {
 	// 	vec3 color = vec3(0.0);
@@ -295,6 +329,9 @@ void main(void)
 	{
 		col=echantillonnage(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
 	}
+  else if(uShaderState==MIROIRDEPOLI){
+    col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+  }
 	else
 	{
 		vec3 color=uKd*dot(normalize(N),normalize(vec3(-pos3D)));// Lambert rendering, eye light source

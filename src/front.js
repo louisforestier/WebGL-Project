@@ -71,23 +71,28 @@ function readyDocument() {
     // Code éxécuter à chaque changement de la liste déroulante des shaders
     shader.addEventListener("change", function() {
         OBJ1.shaderState = this.value;
-        if(this.value == 2 || this.value == 1 || this.value == 4 || this.value == 5){
+        
+        if(this.value == 2 || this.value == 1 || this.value >= 4){
             sliderRef.parentElement.classList.remove("hidden");
         }
         else {
             sliderRef.parentElement.classList.add("hidden");
         }
-        if(this.value == 4 || this.value == 5){
+
+        if(this.value >= 4){
             sliderReg.parentElement.classList.remove("hidden");
             sliderInt.parentElement.classList.remove("hidden");
-            if (this.value == 5) {
+            if (this.value >= 5) {
                 sliderSamples.parentElement.classList.remove("hidden");
+            }
+            else{
+                sliderSamples.parentElement.classList.add("hidden");
             }
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
-            sliderSamples.parentElement.classList.remove("hidden");
+            sliderSamples.parentElement.classList.add("hidden");
         }
     });
 
