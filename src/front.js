@@ -23,6 +23,12 @@ function readyDocument() {
     // Récupération du slider et de l'input number du nombre d'échantillons
     var sliderSamples = document.getElementById("samples");
     var outputSamples = document.getElementById("valueSamples");
+    // Récupération du slider de la position de la lumière
+    var sliderLightPosXZ = document.getElementById("lightPositionXZ");
+    var sliderLightPosXY = document.getElementById("lightPositionXY");
+
+    // Récupération de l'accordion contenant les options de la lumière
+    var accordion = document.getElementById("lightParam");
     
     // Récupération des listes déroulantes des objets, des shaders, 
     // de la skybox et de la skybox réfléchi par l'objet
@@ -36,7 +42,8 @@ function readyDocument() {
     
     // Récupération de des checkbox
     var checkboxWS = document.getElementById("weirdSkybox");
-    var checkboxP = document.getElementById("plane")
+    var checkboxP = document.getElementById("plane");
+    var checkboxL = document.getElementById("light");
     
     // Code éxécuter quand l'on clique sur la accordion, permet de le déplier
     for(var i = 0; i < acc.length; i++){
@@ -88,11 +95,17 @@ function readyDocument() {
             else{
                 sliderSamples.parentElement.classList.add("hidden");
             }
+            accordion.classList.remove("hidden");
         }
         else {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
             sliderSamples.parentElement.classList.add("hidden");
+            accordion.click();
+            accordion.classList.add("hidden");
+            if(checkboxL.checked){
+                checkboxL.click();
+            }
         }
     });
 
@@ -120,6 +133,25 @@ function readyDocument() {
     // Code éxécuter à chaque fois que la checkbox "Afficher le plan" est cliqué
     checkboxP.addEventListener("click", function() {
         DRAWPLANE = this.checked;
+    });
+
+    // Code éxécuter à chaque fois que la checkbox "Détacher la lumière de la caméra" est cliqué
+    checkboxL.addEventListener("click", function() {
+        var div = document.getElementById("LightPosParam");
+        if(this.checked){
+            div.classList.remove("hidden");
+            LIGHT.position[0] = Math.sin(sliderLightPosXZ.value) * Math.cos(sliderLightPosXY.value);
+            LIGHT.position[1] = Math.sin(sliderLightPosXZ.value) * Math.sin(sliderLightPosXY.value);
+            LIGHT.position[2] = Math.cos(sliderLightPosXZ.value);
+            LIGHT.detached = true;
+        }
+        else{
+            LIGHT.position[0] = 0.0;
+            LIGHT.position[1] = 0.0;
+            LIGHT.position[2] = 0.0;
+            LIGHT.detached = false
+            div.classList.add("hidden");
+        }
     });
 
     // Code éxécuter à chaque fois que l'on change la valeur de la skybox
@@ -178,13 +210,31 @@ function readyDocument() {
     // Code permettant de mettre à jour le slider quand on entre un nombre dans l'input number
     sliderInt.oninput = function() {
         outputInt.value = this.value;
-        OBJ1.lightIntensity = this.value;
+        LIGHT.lightIntensity = this.value;
     }
 
     // Code permettant de mettre à jour l'input nom quand le slider change
     outputInt.oninput = function() {
         sliderInt.value = this.value;
-        OBJ1.lightIntensity = this.value;
+        LIGHT.lightIntensity = this.value;
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    sliderLightPosXZ .oninput = function() {
+        if(checkboxL.checked){
+            LIGHT.position[0] = Math.sin(this.value) * Math.cos(sliderLightPosXY.value);
+            LIGHT.position[1] = Math.sin(this.value) * Math.sin(sliderLightPosXY.value);
+            LIGHT.position[2] = Math.cos(this.value);
+        }
+    }
+
+    // Code permettant de mettre à jour l'input nom quand le slider change
+    sliderLightPosXY .oninput = function() {
+        if(checkboxL.checked){
+            LIGHT.position[0] = Math.sin(sliderLightPosXZ.value) * Math.cos(this.value);
+            LIGHT.position[1] = Math.sin(sliderLightPosXZ.value) * Math.sin(this.value);
+            LIGHT.position[2] = Math.cos(sliderLightPosXZ.value);
+        }
     }
 
     // Affecter les valeurs pour le nombre d'échantillons

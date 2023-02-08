@@ -12,6 +12,7 @@ uniform float uLightIntensity;
 uniform int uShaderState;
 uniform vec3 uKd;
 uniform int uNbSamples;
+uniform vec3 uLightPos;
 
 #define AIR_REFRACT_INDEX 1.
 #define REFLECT 0
@@ -56,6 +57,17 @@ float ddot(vec4 left,vec4 right)
 {
 	return max(0.,dot(left,right));
 }
+
+float ddot(vec3 left, vec3 right)
+{
+	return max(0.0,dot(left,right));
+}
+
+float ddot(vec4 left, vec4 right)
+{
+	return max(0.0,dot(left,right));
+}
+
 
 // ======================================================================
 // Jalon 1 : Skybox, Mirroir, Transparence et Fresnel
@@ -140,22 +152,22 @@ float g(vec3 n,vec3 m,vec3 i,vec3 o)
 vec4 cookTorrance(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
 	// Calcul des vecteurs nécessaires plus bas
-	vec3 Vo=normalize(-pos);
-	vec3 i=Vo;
-	vec3 m=normalize(i+Vo);
+	vec3 Vo = normalize(-pos);
+	vec3 i = normalize(uLightPos - pos);
+	vec3 m = normalize(i+Vo);
+
+    // Calcul de la fonction Fs a partir des fonctions F, D et G
+	float F = fresnelFactor(i,m,ni);
+	float D = beckmann(normal,m,sigma);
+	float G = g(normal,m,i,Vo);
+	float fs = (F * D * G) / (4. * ddot(i,normal) * ddot(Vo,normal)); 
+
+    // Calcul de la valeur final de la couleur pour l'objet
+	vec3 fr = ((uKd / PI) * (1.0 - F) +  vec3(fs));
+
+	vec3 color = uLightIntensity * fr * ddot(normal,i);
 	
-	// Calcul de la fonction Fs a partir des fonctions F, D et G
-	float F=fresnelFactor(i,m,ni);
-	float D=beckmann(normal,m,sigma);
-	float G=g(normal,m,i,Vo);
-	float fs=(F*D*G)/(4.*abs(dot(i,normal))*abs(dot(Vo,normal)));
-	
-	// Calcul de la valeur final de la couleur pour l'objet
-	vec3 color=(uKd/PI)*(1.-F)+vec3(fs);
-	
-	color=uLightIntensity*color*dot(normal,i);
-	
-	return vec4(color,1.);
+	return vec4(color,1.0);
 }
 
 // ======================================================================
