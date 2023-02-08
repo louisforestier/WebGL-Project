@@ -4,6 +4,17 @@ function getColor(value){
                      parseInt(value.substring(5), 16)/255];
 }
 
+function hideAccord(accordion){
+    var checkboxL = document.getElementById("light");
+    if(checkboxL.checked){
+        checkboxL.click();
+    }
+    if(accordion.classList.contains("active")){
+        accordion.click();
+    }
+    accordion.classList.add("hidden");
+}
+
 function readyDocument() {
     // Récupération des accordions de la page web
     var acc = document.getElementsByClassName("accordion");
@@ -91,10 +102,7 @@ function readyDocument() {
             sliderInt.parentElement.classList.remove("hidden");
             if (this.value >= 5) {
                 sliderSamples.parentElement.classList.remove("hidden");
-                accordion.classList.add("hidden");
-                if(accordion.classList.contains("active")){
-                  accordion.click();
-                }
+                hideAccord(accordion);
             }
             else{
                 sliderSamples.parentElement.classList.add("hidden");
@@ -105,10 +113,7 @@ function readyDocument() {
             sliderReg.parentElement.classList.add("hidden");
             sliderInt.parentElement.classList.add("hidden");
             sliderSamples.parentElement.classList.add("hidden");
-            accordion.classList.add("hidden");
-            if(accordion.classList.contains("active")){
-              accordion.click();
-            }
+            hideAccord(accordion);
             if(checkboxL.checked){
                 checkboxL.click();
             }
