@@ -58,17 +58,6 @@ float ddot(vec4 left,vec4 right)
 	return max(0.,dot(left,right));
 }
 
-float ddot(vec3 left, vec3 right)
-{
-	return max(0.0,dot(left,right));
-}
-
-float ddot(vec4 left, vec4 right)
-{
-	return max(0.0,dot(left,right));
-}
-
-
 // ======================================================================
 // Jalon 1 : Skybox, Mirroir, Transparence et Fresnel
 // ======================================================================
