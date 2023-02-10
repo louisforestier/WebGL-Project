@@ -332,6 +332,15 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
+vec4 gWalterGGX(float nDotm, float sigma){
+    float sigma2 = square(sigma);
+    float nDotm4 = nDotm * nDotm * nDotm * nDotm;
+    float sinus = sqrt(1. - nDotm2);
+    float tan2 = square(sinus / nDotm);
+    float denominateur = PI * nDotm4 * square(sigma2 + tan2);
+    return sigma2 / denominateur;
+}
+
 vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     return miroirDepoli(pos, normal, invRotMatrix, sigma);
