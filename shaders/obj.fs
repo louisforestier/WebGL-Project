@@ -332,13 +332,43 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
+// ======================================================================
+// Jalon BONUS : WalterGGX
+// ======================================================================
+
+vec3 computeNormal(float sigma)
+{
+	float phi=rand()*2.*PI;
+	float theta=atan(sqrt(-square(sigma)*log(1.-rand())));
+	vec3 m=vec3(0.);
+	m.x=sin(theta)*cos(phi);
+	m.y=sin(theta)*sin(phi);
+	m.z=cos(theta);
+	return m;
+}
+
+// Ici, on se soucis pas du signe de nDotm car on le gère dans la fonction walterGGX 
 vec4 dWalterGGX(float nDotm, float sigma){
     float sigma2 = square(sigma);
-    float nDotm4 = nDotm * nDotm * nDotm * nDotm;
+    float nDotm2 = square(nDotm);
     float sinus = sqrt(1. - nDotm2);
     float tan2 = square(sinus / nDotm);
-    float denominateur = PI * nDotm4 * square(sigma2 + tan2);
+    float denominateur = PI * square(nDotm2) * square(sigma2 + tan2);
     return sigma2 / denominateur;
+}
+
+float g1WalterGGX(float vDotn, float vDotm, float sigma) {
+    float cosTv2 = vDotn * vDotm;
+    float sinTv2 = 1 - cosTv2;
+    float tanTv2 = sinTv2/cosTv2;
+    float denom = 1 + sqrt(1 + sqaure(sigma) * tanTv2);
+	return 2 / denom;
+}
+
+float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
+    float g1IM = g1WalterGGX(ddot(i,n),ddot(i,m),sigma);
+    float g1OM = g1WalterGGX(ddot(o,n),ddot(o, n), sigma);
+    return  g1OM * g1IM;
 }
 
 vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
