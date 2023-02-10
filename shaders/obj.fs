@@ -332,7 +332,7 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
-vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
+vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     return miroirDepoli(pos, normal, invRotMatrix, sigma);
 }
@@ -367,7 +367,7 @@ void main(void)
         col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
     }
     else if(uShaderState==WALTERGGX){
-        col=walterGGX(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
+        col=walterGGX(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
     }
 	else
 	{
