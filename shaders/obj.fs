@@ -21,7 +21,8 @@ uniform vec3 uLightPos;
 #define COOKTORRANCE 4
 #define ECHANTILLONNAGE 5
 #define MIROIRDEPOLI 6
-#define WALTERGGX 7
+#define WALTERGGXBRDF 7
+#define WALTERGGXBSDF 8
 
 #define PI 3.1415926538
 
@@ -379,7 +380,7 @@ float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
 }
 
 // Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance de manière "optimisée"
-vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
 	//100 échantillons au maximum
@@ -454,8 +455,11 @@ void main(void)
     else if(uShaderState==MIROIRDEPOLI){
         col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
     }
-    else if(uShaderState==WALTERGGX){
-        col=walterGGX(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+    else if(uShaderState==WALTERGGXBRDF){
+        col=walterGGXBRDF(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+    }
+    else if(uShaderState==WALTERGGXBSDF){
+        col=walterGGXBRDF(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
     }
 	else
 	{

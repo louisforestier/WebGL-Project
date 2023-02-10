@@ -28,7 +28,8 @@ const ShaderState = {
 	CookTorrance:4,
 	Echantillonnage:5,
     MiroirDepoli:6,
-    WalterGGX:7
+    WalterGGXBRDF:7,
+    WalterGGXBSDF:8
 };
 
 // =====================================================
