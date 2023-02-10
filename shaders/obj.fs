@@ -285,7 +285,6 @@ vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma
 		
 		// // Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
-		float D=beckmannOpti(nDotm,sigma);
 		float G=gOpti(nDotm,iDotn, oDotn, ddot(Vo,m), ddot(i,m));
 		//D a été supprimé du calcul de pdf et brdf par simplification
 		float pdf=nDotm;
@@ -336,10 +335,13 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 // Jalon BONUS : WalterGGX
 // ======================================================================
 
-vec3 computeNormal(float sigma)
+vec3 computeNormalWalterGGX(float sigma)
 {
+    float zigouigoui = rand();
+    float numT = sigma * sqrt(zigouigoui);
+    float denumT = sqrt(1. - zigouigoui);
+	float theta=atan(numT/denumT);
 	float phi=rand()*2.*PI;
-	float theta=atan(sqrt(-square(sigma)*log(1.-rand())));
 	vec3 m=vec3(0.);
 	m.x=sin(theta)*cos(phi);
 	m.y=sin(theta)*sin(phi);
@@ -348,22 +350,22 @@ vec3 computeNormal(float sigma)
 }
 
 // Ici, on se soucis pas du signe de nDotm car on le gère dans la fonction walterGGX 
-vec4 dWalterGGX(float nDotm, float sigma){
+float dWalterGGX(float nDotm, float sigma){
     float sigma2 = sigma * sigma;
     float cosTv2 = nDotm * nDotm;
-    float sinTv2 = 1 - cosTv2;
+    float sinTv2 = 1. - cosTv2;
     float tanTv2 = sinTv2/cosTv2;
     float denominateur = PI * cosTv2 * cosTv2 * square(sigma2 + tanTv2);
     return sigma2 / denominateur;
 }
 
 float g1WalterGGX(float vDotn, float vDotm, float sigma) {
-    float sign = max(0, vDotm / vDotn);
+    float sign = max(0., vDotm / vDotn);
     float cosTv2 = vDotn * vDotn;
-    float sinTv2 = 1 - cosTv2;
+    float sinTv2 = 1. - cosTv2;
     float tanTv2 = sinTv2/cosTv2;
-    float denom = 1 + sqrt(1 + sqaure(sigma) * tanTv2);
-	return sign * (2 / denom);
+    float denom = 1. + sqrt(1. + square(sigma) * tanTv2);
+	return sign * (2. / denom);
 }
 
 float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
@@ -374,7 +376,48 @@ float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
 
 vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
-    return miroirDepoli(pos, normal, invRotMatrix, sigma);
+    vec3 Lo=vec3(0.);
+	//100 échantillons au maximum
+	for(int k=0;k<100;k++)
+	{
+		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		if(k>=uNbSamples)
+			break;
+		
+		vec3 Vo=normalize(-pos);
+		vec3 m=computeNormalWalterGGX(sigma);
+
+		//Calcul de la matrice de rotation locale
+		vec3 i0=vec3(1,0,0);
+		if(dot(i0,normal)>.8)
+		{
+			i0=vec3(0,1,0);
+		}
+		vec3 j=cross(i0,normal);
+		vec3 i1=cross(j,normal);
+		mat3 Mrl=mat3(i1,j,normal);
+		
+		m=normalize(Mrl*m);
+		vec3 i=reflect(-Vo,m);
+		float nDotm = ddot(normal,m);
+		float iDotn = ddot(i,normal);
+		float oDotn = ddot(Vo,normal);
+		//pour éviter les divisions par 0
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
+			continue;
+		
+		// // Calcul de la fonction Fs a partir des fonctions F, D et G
+		float F=fresnelFactor(i,m,ni);
+		float G=gWalterGGX(i, Vo, m, normal, sigma);
+		//D a été supprimé du calcul de pdf et brdf par simplification
+		float pdf=nDotm;
+		float brdf=(F*G)/(4.*iDotn*oDotn);
+		vec3 Li=vec3(0.);
+		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		
+		Lo+=Li*brdf*iDotn/pdf;
+	}
+	return vec4(Lo/float(uNbSamples),1.);
 }
 
 // ======================================================================
