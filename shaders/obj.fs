@@ -349,26 +349,27 @@ vec3 computeNormal(float sigma)
 
 // Ici, on se soucis pas du signe de nDotm car on le gère dans la fonction walterGGX 
 vec4 dWalterGGX(float nDotm, float sigma){
-    float sigma2 = square(sigma);
-    float nDotm2 = square(nDotm);
-    float sinus = sqrt(1. - nDotm2);
-    float tan2 = square(sinus / nDotm);
-    float denominateur = PI * square(nDotm2) * square(sigma2 + tan2);
+    float sigma2 = sigma * sigma;
+    float cosTv2 = nDotm * nDotm;
+    float sinTv2 = 1 - cosTv2;
+    float tanTv2 = sinTv2/cosTv2;
+    float denominateur = PI * cosTv2 * cosTv2 * square(sigma2 + tanTv2);
     return sigma2 / denominateur;
 }
 
 float g1WalterGGX(float vDotn, float vDotm, float sigma) {
-    float cosTv2 = vDotn * vDotm;
+    float sign = max(0, vDotm / vDotn);
+    float cosTv2 = vDotn * vDotn;
     float sinTv2 = 1 - cosTv2;
     float tanTv2 = sinTv2/cosTv2;
     float denom = 1 + sqrt(1 + sqaure(sigma) * tanTv2);
-	return 2 / denom;
+	return sign * (2 / denom);
 }
 
 float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
     float g1IM = g1WalterGGX(ddot(i,n),ddot(i,m),sigma);
-    float g1OM = g1WalterGGX(ddot(o,n),ddot(o, n), sigma);
-    return  g1OM * g1IM;
+    float g1OM = g1WalterGGX(ddot(o,n),ddot(o, m), sigma);
+    return g1OM * g1IM;
 }
 
 vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
