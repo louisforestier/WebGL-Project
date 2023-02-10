@@ -21,6 +21,7 @@ uniform vec3 uLightPos;
 #define COOKTORRANCE 4
 #define ECHANTILLONNAGE 5
 #define MIROIRDEPOLI 6
+#define WALTERGGX 7
 
 #define PI 3.1415926538
 
@@ -297,7 +298,6 @@ vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
-
 //Simule un miroir dépoli en considérant les microfacettes comme des miroirs, plus ou moins dépoli en fonction de sigma 
 vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 {
@@ -332,6 +332,10 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
+vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
+{
+    return miroirDepoli(pos, normal, invRotMatrix, sigma);
+}
 
 // ======================================================================
 // Main du Shader
@@ -359,9 +363,12 @@ void main(void)
 	{
 		col=echantillonnage(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
 	}
-  else if(uShaderState==MIROIRDEPOLI){
-    col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
-  }
+    else if(uShaderState==MIROIRDEPOLI){
+        col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
+    }
+    else if(uShaderState==WALTERGGX){
+        col=walterGGX(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
+    }
 	else
 	{
 		vec3 color=uKd*dot(normalize(N),normalize(vec3(-pos3D)));// Lambert rendering, eye light source
