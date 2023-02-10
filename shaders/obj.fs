@@ -335,6 +335,7 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 // Jalon BONUS : WalterGGX
 // ======================================================================
 
+//Calcule la normale selon WalterGGX en fonction de sigma (et de 2 valeurs aléatoires)
 vec3 computeNormalWalterGGX(float sigma)
 {
     float zigouigoui = rand();
@@ -349,6 +350,7 @@ vec3 computeNormalWalterGGX(float sigma)
 	return m;
 }
 
+// Fonction calculant la distribution de WalterGGX de manière "optimisée"
 // Ici, on se soucis pas du signe de nDotm car on le gère dans la fonction walterGGX 
 float dWalterGGX(float nDotm, float sigma){
     float sigma2 = sigma * sigma;
@@ -359,6 +361,7 @@ float dWalterGGX(float nDotm, float sigma){
     return sigma2 / denominateur;
 }
 
+// Fonction g1 aidant au calcul de l'ombrage et du masquage de gWalterGGX
 float g1WalterGGX(float vDotn, float vDotm, float sigma) {
     float sign = max(0., vDotm / vDotn);
     float cosTv2 = vDotn * vDotn;
@@ -368,12 +371,14 @@ float g1WalterGGX(float vDotn, float vDotm, float sigma) {
 	return sign * (2. / denom);
 }
 
+// Fonction calculant l'ombrage et le Masquage de manière WalterGGX "optimisée"
 float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
     float g1IM = g1WalterGGX(ddot(i,n),ddot(i,m),sigma);
     float g1OM = g1WalterGGX(ddot(o,n),ddot(o, m), sigma);
     return g1OM * g1IM;
 }
 
+// Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance de manière "optimisée"
 vec4 walterGGX(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
