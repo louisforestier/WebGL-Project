@@ -29,7 +29,8 @@ const ShaderState = {
 	Echantillonnage:5,
     MiroirDepoli:6,
     WalterGGXBRDF:7,
-    WalterGGXBSDF:8
+    WalterGGXBSDF:8,
+	TransparenceDepoli:9
 };
 
 // =====================================================

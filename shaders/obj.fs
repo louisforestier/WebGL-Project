@@ -23,6 +23,7 @@ uniform vec3 uLightPos;
 #define MIROIRDEPOLI 6
 #define WALTERGGXBRDF 7
 #define WALTERGGXBSDF 8
+#define TRANSPARENCEDEPOLI 9
 
 #define PI 3.1415926538
 
@@ -48,13 +49,13 @@ float square(float x)
 	return x*x;
 }
 
-//renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
+// Renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
 float ddot(vec3 left,vec3 right)
 {
 	return max(0.,dot(left,right));
 }
 
-//renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
+// Renvoie le max entre 0 et le produit scalaire des vecteurs en paramètres
 float ddot(vec4 left,vec4 right)
 {
 	return max(0.,dot(left,right));
@@ -166,17 +167,17 @@ vec4 cookTorrance(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 // ======================================================================
 
 float RAND_CONST=0.;
-//Génère un nombre aléatoire entre 0 et 1
+// Génère un nombre aléatoire entre 0 et 1
 float rand()
 {
 	vec2 co=(invRotMatrix*gl_FragCoord).xy;
 	co+=RAND_CONST;
-	// limite le nombre d'échantillon à 100
+	// Limite le nombre d'échantillon à 100
 	RAND_CONST+=.01;
 	return fract(sin(dot(co,vec2(12.9898,78.233)))*43758.5453);
 }
 
-//Calcule la normale selon la pdf en fonction de sigma (et de 2 valeurs aléatoires)
+// Calcule la normale selon la pdf en fonction de sigma (et de 2 valeurs aléatoires)
 vec3 computeNormal(float sigma)
 {
 	float phi=rand()*2.*PI;
@@ -188,20 +189,20 @@ vec3 computeNormal(float sigma)
 	return m;
 }
 
-//Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance
+// Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance
 vec4 echantillonnagePasOpti(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
 	vec3 Lo=vec3(0.);
-	//100 échantillons au maximum
+	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
-		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
 		if(k>=uNbSamples) 
 			break;
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
-		//Calcul de la matrice de rotation locale
+		// Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
@@ -224,8 +225,7 @@ vec4 echantillonnagePasOpti(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,floa
 		float pdf=D*ddot(normal,m);
 		float brdf=(F*D*G)/(4.*ddot(i,normal)*ddot(Vo,normal));
 		float iDotn = ddot(i,normal);
-		vec3 Li=vec3(0.);
-		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
 	}
@@ -251,21 +251,21 @@ float gOpti(float nDotm,float iDotn,float oDotn,float oDotm,float iDotm)
 	return min(1.,min(nDotm2 * oDotn / oDotm, nDotm2 * iDotn / iDotm));
 }
 
-//Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance de manière "optimisée"
+// Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance de manière "optimisée"
 vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
 	vec3 Lo=vec3(0.);
-	//100 échantillons au maximum
+	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
-		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
 		if(k>=uNbSamples)
 			break;
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
 
-		//Calcul de la matrice de rotation locale
+		// Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
@@ -280,39 +280,38 @@ vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma
 		float nDotm = ddot(normal,m);
 		float iDotn = ddot(i,normal);
 		float oDotn = ddot(Vo,normal);
-		//pour éviter les divisions par 0
+		// Pour éviter les divisions par 0
 		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
 			continue;
 		
-		// // Calcul de la fonction Fs a partir des fonctions F, D et G
+		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
 		float G=gOpti(nDotm,iDotn, oDotn, ddot(Vo,m), ddot(i,m));
-		//D a été supprimé du calcul de pdf et brdf par simplification
+		// D a été supprimé du calcul de pdf et brdf par simplification
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
-		vec3 Li=vec3(0.);
-		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
 	}
 	return vec4(Lo/float(uNbSamples),1.);
 }
 
-//Simule un miroir dépoli en considérant les microfacettes comme des miroirs, plus ou moins dépoli en fonction de sigma 
+// Simule un miroir dépoli en considérant les microfacettes comme des miroirs, plus ou moins dépoli en fonction de sigma 
 vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 {
 	vec3 Lo=vec3(0.);
-	//100 échantillons au maximum
+	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
-		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
 		if(k>=uNbSamples)
 			break;
 
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
 
-		//Calcul de la matrice de rotation locale
+		// Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
@@ -336,12 +335,12 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 // Jalon BONUS : WalterGGX
 // ======================================================================
 
-//Calcule la normale selon WalterGGX en fonction de sigma (et de 2 valeurs aléatoires)
+// Calcule la normale selon WalterGGX en fonction de sigma (et de 2 valeurs aléatoires)
 vec3 computeNormalWalterGGX(float sigma)
 {
-    float zigouigoui = rand();
-    float numT = sigma * sqrt(zigouigoui);
-    float denumT = sqrt(1. - zigouigoui);
+    float ksi1 = rand();
+    float numT = sigma * sqrt(ksi1);
+    float denumT = sqrt(1. - ksi1);
 	float theta=atan(numT/denumT);
 	float phi=rand()*2.*PI;
 	vec3 m=vec3(0.);
@@ -383,17 +382,17 @@ float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
 vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
-	//100 échantillons au maximum
+	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
-		//si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
 		if(k>=uNbSamples)
 			break;
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormalWalterGGX(sigma);
 
-		//Calcul de la matrice de rotation locale
+		// Calcul de la matrice de rotation locale
 		vec3 i0=vec3(1,0,0);
 		if(dot(i0,normal)>.8)
 		{
@@ -408,23 +407,115 @@ vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		float nDotm = ddot(normal,m);
 		float iDotn = ddot(i,normal);
 		float oDotn = ddot(Vo,normal);
-		//pour éviter les divisions par 0
+		// Pour éviter les divisions par 0
 		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
 			continue;
 		
-		// // Calcul de la fonction Fs a partir des fonctions F, D et G
+		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
 		float G=gWalterGGX(i, Vo, m, normal, sigma);
-		//D a été supprimé du calcul de pdf et brdf par simplification
+		
+		// D a été supprimé du calcul de pdf et brdf par simplification
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
-		vec3 Li=vec3(0.);
-		Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
 	}
 	return vec4(Lo/float(uNbSamples),1.);
 }
+
+//=======================================================================
+// Calcul de la transparence selon Walter
+//=======================================================================
+vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+{
+    vec3 Lo=vec3(0.);
+	// 100 échantillons au maximum
+	for(int k=0;k<100;k++)
+	{
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		if(k>=uNbSamples)
+			break;
+		
+		vec3 Vo=normalize(-pos);
+		vec3 m=computeNormalWalterGGX(sigma);
+
+		// Calcul de la matrice de rotation locale
+		vec3 i0=vec3(1,0,0);
+		if(dot(i0,normal)>.8)
+		{
+			i0=vec3(0,1,0);
+		}
+		vec3 j=cross(i0,normal);
+		vec3 i1=cross(j,normal);
+		mat3 Mrl=mat3(i1,j,normal);
+		
+		m=normalize(Mrl*m);
+		vec3 i=reflect(-Vo,m);
+		vec3 i_t=refract(-Vo,m,AIR_REFRACT_INDEX/ni);
+		float nDotm = ddot(normal,m);
+		float iDotn = ddot(i,normal);
+		float oDotn = ddot(Vo,normal);
+		// Pour éviter les divisions par 0
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
+			continue;
+		
+		// Calcul de la fonction Fs a partir des fonctions F, D et G
+		float F=fresnelFactor(i,m,ni);
+		float G=gWalterGGX(i, Vo, m, normal, sigma);
+
+		// D a été supprimé du calcul de pdf et brdf par simplification
+		// Eta_o n'est pas pris en compte car considéré à 1, l'indice de réfraction de l'air
+		float G_t = gWalterGGX(-i_t,Vo,m,normal,sigma);
+		float btdf = (abs(dot(i,m)) * abs(dot(Vo,m)))/(abs(dot(i,normal)) * abs(dot(Vo,normal)));
+		btdf *= (1.0 - F) * G_t;
+		btdf /= (square(ni*dot(i,m)+dot(Vo,m)));
+		float pdf=nDotm;
+		float brdf=(F*G)/(4.*iDotn*oDotn);
+		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
+		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
+
+		Lo+=(Li*brdf+Li_t*btdf)*iDotn/pdf;
+	}
+	return vec4(Lo/float(uNbSamples),1.);
+}
+
+
+//=======================================================================
+// Calcul de la "transparence dépoli"
+//=======================================================================
+vec4 transparenceDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
+{
+    vec3 Lo=vec3(0.);
+	// 100 échantillons au maximum
+	for(int k=0;k<100;k++)
+	{
+		// Si le numéro de l'échantillon est supérieur ou égal au nombre passé en uniform, on sort de la boucle
+		if(k>=uNbSamples)
+			break;
+		
+		vec3 Vo=normalize(-pos);
+		vec3 m=computeNormalWalterGGX(sigma);
+
+		// Calcul de la matrice de rotation locale
+		vec3 i0=vec3(1,0,0);
+		if(dot(i0,normal)>.8)
+		{
+			i0=vec3(0,1,0);
+		}
+		vec3 j=cross(i0,normal);
+		vec3 i1=cross(j,normal);
+		mat3 Mrl=mat3(i1,j,normal);
+		
+		m=normalize(Mrl*m);
+		vec3 i_t=refract(-Vo,m,AIR_REFRACT_INDEX/ni);
+		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
+		Lo+=Li_t;
+	}
+	return vec4(Lo/float(uNbSamples),1.);
+}
+
 
 // ======================================================================
 // Main du Shader
@@ -452,15 +543,22 @@ void main(void)
 	{
 		col=echantillonnage(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
 	}
-    else if(uShaderState==MIROIRDEPOLI){
+    else if(uShaderState==MIROIRDEPOLI)
+	{
         col=miroirDepoli(pos3D.xyz,normalize(N),invRotMatrix,uSigma);
     }
-    else if(uShaderState==WALTERGGXBRDF){
+    else if(uShaderState==WALTERGGXBRDF)
+	{
         col=walterGGXBRDF(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
     }
-    else if(uShaderState==WALTERGGXBSDF){
-        col=walterGGXBRDF(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+    else if(uShaderState==WALTERGGXBSDF)
+	{
+        col=walterGGXBSDF(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
     }
+	else if(uShaderState==TRANSPARENCEDEPOLI)
+	{
+		col=transparenceDepoli(pos3D.xyz,normalize(N),invRotMatrix,uRefractIndex,uSigma);
+	}
 	else
 	{
 		vec3 color=uKd*dot(normalize(N),normalize(vec3(-pos3D)));// Lambert rendering, eye light source
