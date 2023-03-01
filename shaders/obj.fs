@@ -473,19 +473,15 @@ vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		// D a été supprimé du calcul de pdf et brdf par simplification
 		// Eta_o n'est pas pris en compte car considéré à 1, l'indice de réfraction de l'air
 		float G_t = gWalterGGX(-i_t,Vo,m,normal,sigma);
-		float btdf = (abs(dot(i_t,m)) * abs(dot(Vo,m)))/(abs(dot(i_t,normal)) * abs(dot(Vo,normal)));
-		btdf *= (1.0 - F) * G;
-		// btdf *= 1.0;
-		btdf /= (square(ni*dot(i_t,m)+dot(Vo,m)));
-		// btdf /= 1.0;
-		btdf = clamp(btdf,0.0,1.0);
+		float btdf = (abs(dot(-i_t,m)) * abs(dot(Vo,m)))/(abs(dot(-i_t,normal)) * abs(dot(Vo,normal)));
+		btdf *= (1.0 - F) * G_t;
+		btdf /= (square(ni*dot(-i_t,m)+dot(Vo,m)));
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
-
-		Lo+=(brdf*Li+btdf*Li_t)*iDotn/pdf;
-		// Lo+=(btdf)*iDotn/pdf;
+		float tDotn = ddot(-i_t,normal);
+		Lo+=(brdf*Li*iDotn+btdf*Li_t*tDotn)/pdf;
 	}
 	return vec4(Lo/float(nbSample),1.);
 }
