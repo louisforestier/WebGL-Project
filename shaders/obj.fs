@@ -364,6 +364,10 @@ float dWalterGGX(float nDotm, float sigma){
 // Fonction g1 aidant au calcul de l'ombrage et du masquage de gWalterGGX
 float g1WalterGGX(float vDotn, float vDotm, float sigma) {
     float sign = max(0., vDotm / vDotn);
+	if(sign != 0.)
+	{
+		sign = 1.;
+	}
     float cosTv2 = vDotn * vDotn;
     float sinTv2 = 1. - cosTv2;
     float tanTv2 = sinTv2/cosTv2;
@@ -431,6 +435,7 @@ vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -460,7 +465,7 @@ vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		// Pour éviter les divisions par 0
 		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
 			continue;
-		
+		nbSample +=1;
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
 		float G=gWalterGGX(i, Vo, m, normal, sigma);
@@ -468,17 +473,21 @@ vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		// D a été supprimé du calcul de pdf et brdf par simplification
 		// Eta_o n'est pas pris en compte car considéré à 1, l'indice de réfraction de l'air
 		float G_t = gWalterGGX(-i_t,Vo,m,normal,sigma);
-		float btdf = (abs(dot(i,m)) * abs(dot(Vo,m)))/(abs(dot(i,normal)) * abs(dot(Vo,normal)));
-		btdf *= (1.0 - F) * G_t;
-		btdf /= (square(ni*dot(i,m)+dot(Vo,m)));
+		float btdf = (abs(dot(i_t,m)) * abs(dot(Vo,m)))/(abs(dot(i_t,normal)) * abs(dot(Vo,normal)));
+		btdf *= (1.0 - F) * G;
+		// btdf *= 1.0;
+		btdf /= (square(ni*dot(i_t,m)+dot(Vo,m)));
+		// btdf /= 1.0;
+		btdf = clamp(btdf,0.0,1.0);
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
 
-		Lo+=(Li*brdf+Li_t*btdf)*iDotn/pdf;
+		Lo+=(brdf*Li+btdf*Li_t)*iDotn/pdf;
+		// Lo+=(btdf)*iDotn/pdf;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 
