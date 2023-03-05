@@ -9,6 +9,7 @@ FORESTIER Louis**
 - [Fonctionnalités implantés](#fonctionnalités-implantés)
   - [Jalon 1](#jalon-1)
   - [Jalon 2](#jalon-2)
+  - [Jalon 3](#jalon-3)
   - [Bonus](#bonus)
 - [Problème de buffers](#problème-de-buffers)
   - [Explication de la solution](#explication-de-la-solution)
@@ -28,6 +29,14 @@ Dans cette section, nous allons détailler les fonctionnalités implantées dans
 ### Jalon 2
 
 - Ajout de l'équation de **Cook & Torrance**, avec possibilité de jouer sur la rugosité de l'objet et l'intensité de la lumière
+
+### Jalon 3
+Ajout de l'échantillonnage d'importance, avec de multiples modes : 
+- la BRDF de **Cook & Torrance**
+- le miroir dépoli
+- la BRDF selon Walter
+- la "transparence dépolie"
+- la BSDF (transparence et réflexion) selon Walter (N'est pas parfaite car il semblerait qu'il y ait une perte d'énergie et donc un rendu un peu sombre)
 
 ### Bonus
 
