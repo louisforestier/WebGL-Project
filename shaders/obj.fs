@@ -122,6 +122,8 @@ vec4 fresnelEffect(vec3 pos,vec3 normal,mat4 invRotMatrix,float ind1,float ind2)
 float beckmann(vec3 n,vec3 m,float sigma)
 {
 	float cosinus=ddot(n,m);
+	if (cosinus == 0.0)
+		return 0.0;
 	float denominateur=PI*square(sigma)*square(square(cosinus));
 	float sinus=sqrt(1.-square(cosinus));
 	float tangente=sinus/cosinus;
@@ -136,6 +138,8 @@ float g(vec3 n,vec3 m,vec3 i,vec3 o)
 	float num2=2.*ddot(n,m)*ddot(n,i);
 	float denom1=ddot(o,m);
 	float denom2=ddot(i,m);
+	if (denom1 == 0.0 || denom2 == 0.0)
+		return 0.0;
 	return min(1.,min(num1/denom1,num2/denom2));
 }
 
@@ -189,10 +193,26 @@ vec3 computeNormal(float sigma)
 	return m;
 }
 
+vec3 rotateNormal(vec3 normal, vec3 m)
+{
+	// Calcul de la matrice de rotation locale
+	vec3 i0=vec3(1,0,0);
+	if(dot(i0,normal)>.8)
+	{
+		i0=vec3(0,1,0);
+	}
+	vec3 j=cross(i0,normal);
+	vec3 i1=cross(j,normal);
+	mat3 Mrl=mat3(i1,j,normal);
+	
+	return normalize(Mrl*m);
+}
+
 // Calcul de l'éclairement d'un objet avec l'échantillonnage d'importance
 vec4 echantillonnagePasOpti(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
 	vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -202,34 +222,29 @@ vec4 echantillonnagePasOpti(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,floa
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
+
+		m = rotateNormal(normal, m);
+
 		vec3 i=reflect(-Vo,m);
-		float test=ddot(normal,m);
-		if(test == 0.0)
+		float nDotm=ddot(normal,m);
+		float iDotn = ddot(i,normal);
+		float oDotn = ddot(Vo,normal);
+		// Pour éviter les divisions par 0
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
 			continue;
 		
 		//Calcul de la brdf à partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
 		float D=beckmann(normal,m,sigma);
 		float G=g(normal,m,i,Vo);
-		float pdf=D*ddot(normal,m);
-		float brdf=(F*D*G)/(4.*ddot(i,normal)*ddot(Vo,normal));
-		float iDotn = ddot(i,normal);
+		float pdf=D*nDotm;
+		float brdf=(F*D*G)/(4.*iDotn*oDotn);
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
+		nbSample+=1;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 // Fonction calculant la distribution de Beckmann de manière "optimisée"
@@ -255,6 +270,7 @@ float gOpti(float nDotm,float iDotn,float oDotn,float oDotm,float iDotm)
 vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
 	vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -264,43 +280,37 @@ vec4 echantillonnage(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
+		m = rotateNormal(normal, m);
 
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
 		vec3 i=reflect(-Vo,m);
 		float nDotm = ddot(normal,m);
 		float iDotn = ddot(i,normal);
 		float oDotn = ddot(Vo,normal);
+		float iDotm = ddot(i,m);
+		float oDotm = ddot(Vo,m);
 		// Pour éviter les divisions par 0
-		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0 || iDotm == 0.0 || oDotm == 0.0)
 			continue;
 		
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
-		float G=gOpti(nDotm,iDotn, oDotn, ddot(Vo,m), ddot(i,m));
+		float G=gOpti(nDotm,iDotn, oDotn, oDotm, iDotm);
 		// D a été supprimé du calcul de pdf et brdf par simplification
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
+		nbSample+=1;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 // Simule un miroir dépoli en considérant les microfacettes comme des miroirs, plus ou moins dépoli en fonction de sigma 
 vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 {
 	vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -310,25 +320,16 @@ vec4 miroirDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float sigma)
 
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormal(sigma);
+		m = rotateNormal(normal, m);
 
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
 		vec3 i=reflect(-Vo,m);
 		
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo += Li;
+		nbSample+=1;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 // ======================================================================
@@ -376,9 +377,9 @@ float g1WalterGGX(float vDotn, float vDotm, float sigma) {
 }
 
 // Fonction calculant l'ombrage et le Masquage de manière WalterGGX "optimisée"
-float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
-    float g1IM = g1WalterGGX(ddot(i,n),ddot(i,m),sigma);
-    float g1OM = g1WalterGGX(ddot(o,n),ddot(o, m), sigma);
+float gWalterGGX(float iDotn, float iDotm, float oDotn, float oDotm, float sigma){
+    float g1IM = g1WalterGGX(iDotn, iDotm, sigma);
+    float g1OM = g1WalterGGX(oDotn, oDotm, sigma);
     return g1OM * g1IM;
 }
 
@@ -386,6 +387,7 @@ float gWalterGGX(vec3 i, vec3 o, vec3 m, vec3 n, float sigma){
 vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -395,29 +397,21 @@ vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormalWalterGGX(sigma);
+		m = rotateNormal(normal, m);
 
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
 		vec3 i=reflect(-Vo,m);
 		float nDotm = ddot(normal,m);
 		float iDotn = ddot(i,normal);
 		float oDotn = ddot(Vo,normal);
+		float iDotm = ddot(i,m);
+		float oDotm = ddot(Vo,m);
 		// Pour éviter les divisions par 0
 		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
 			continue;
 		
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
-		float G=gWalterGGX(i, Vo, m, normal, sigma);
+		float G=gWalterGGX(iDotn, iDotm, oDotn, oDotm, sigma);
 		
 		// D a été supprimé du calcul de pdf et brdf par simplification
 		float pdf=nDotm;
@@ -425,8 +419,9 @@ vec4 walterGGXBRDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		
 		Lo+=Li*brdf*iDotn/pdf;
+		nbSample+=1;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 //=======================================================================
@@ -445,43 +440,43 @@ vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormalWalterGGX(sigma);
+		m = rotateNormal(normal, m);
 
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
-		vec3 i=reflect(-Vo,m);
-		vec3 i_t=refract(-Vo,m,AIR_REFRACT_INDEX/ni);
+		vec3 i=reflect(-Vo,m); // rayon incident
+		vec3 i_t=refract(-Vo,m,AIR_REFRACT_INDEX/ni); // rayon réfracté
+
 		float nDotm = ddot(normal,m);
 		float iDotn = ddot(i,normal);
 		float oDotn = ddot(Vo,normal);
+		float iDotm = ddot(i,m);
+		float oDotm = ddot(Vo,m);
+		float tDotn = ddot(i_t,-normal);
+		float tDotm = ddot(i_t,-m);
 		// Pour éviter les divisions par 0
-		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0)
+		if(nDotm == 0.0 || iDotn == 0.0 || oDotn == 0.0 || tDotn == 0.0)
 			continue;
-		nbSample +=1;
+		
 		// Calcul de la fonction Fs a partir des fonctions F, D et G
 		float F=fresnelFactor(i,m,ni);
-		float G=gWalterGGX(i, Vo, m, normal, sigma);
+		float G=gWalterGGX(iDotn, iDotm, oDotn, oDotm, sigma);
 
 		// D a été supprimé du calcul de pdf et brdf par simplification
 		// Eta_o n'est pas pris en compte car considéré à 1, l'indice de réfraction de l'air
-		float G_t = gWalterGGX(-i_t,Vo,m,normal,sigma);
-		float btdf = (abs(dot(-i_t,m)) * abs(dot(Vo,m)))/(abs(dot(-i_t,normal)) * abs(dot(Vo,normal)));
-		btdf *= (1.0 - F) * G_t;
-		btdf /= (square(ni*dot(-i_t,m)+dot(Vo,m)));
+
+		float G_t = gWalterGGX(tDotn, tDotm, oDotn, oDotm, sigma); // calcul du masquage pour le rayon réfracté
+
+		float btdf = (tDotm * oDotm)/(tDotn * oDotn); // calcul de la première partie de la btdf
+		btdf *= (1.0 - F) * G_t; 
+		btdf /= (square(ni*tDotm+oDotm));
+
 		float pdf=nDotm;
 		float brdf=(F*G)/(4.*iDotn*oDotn);
+		
 		vec3 Li=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i,1.))).rgb;
 		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
-		float tDotn = ddot(-i_t,normal);
+		
 		Lo+=(brdf*Li*iDotn+btdf*Li_t*tDotn)/pdf;
+		nbSample +=1;
 	}
 	return vec4(Lo/float(nbSample),1.);
 }
@@ -493,6 +488,7 @@ vec4 walterGGXBSDF(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 vec4 transparenceDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float sigma)
 {
     vec3 Lo=vec3(0.);
+	int nbSample = 0;
 	// 100 échantillons au maximum
 	for(int k=0;k<100;k++)
 	{
@@ -502,23 +498,14 @@ vec4 transparenceDepoli(vec3 pos,vec3 normal,mat4 invRotMatrix,float ni,float si
 		
 		vec3 Vo=normalize(-pos);
 		vec3 m=computeNormalWalterGGX(sigma);
+		m = rotateNormal(normal, m);
 
-		// Calcul de la matrice de rotation locale
-		vec3 i0=vec3(1,0,0);
-		if(dot(i0,normal)>.8)
-		{
-			i0=vec3(0,1,0);
-		}
-		vec3 j=cross(i0,normal);
-		vec3 i1=cross(j,normal);
-		mat3 Mrl=mat3(i1,j,normal);
-		
-		m=normalize(Mrl*m);
 		vec3 i_t=refract(-Vo,m,AIR_REFRACT_INDEX/ni);
 		vec3 Li_t=textureCube(uSampler,adaptDir(invRotMatrix*vec4(i_t,1.))).rgb;
 		Lo+=Li_t;
+		nbSample+=1;
 	}
-	return vec4(Lo/float(uNbSamples),1.);
+	return vec4(Lo/float(nbSample),1.);
 }
 
 
