@@ -31,9 +31,12 @@ Dans cette section, nous allons détailler les fonctionnalités implantées dans
 - Ajout de l'équation de **Cook & Torrance**, avec possibilité de jouer sur la rugosité de l'objet et l'intensité de la lumière
 
 ### Jalon 3
-
-- Ajout de **l'échantillonnage d'importance**, avec la possibilité de jouer sur le nombre d'échantillons.
-- Ajout du **Miroir dépoli** basé sur **l'échantillonnage d'importance**, aussi avec la possibilité de jouer sur le nombre d'échantillons.
+Ajout de l'échantillonnage d'importance, avec de multiples modes : 
+- la BRDF de **Cook & Torrance**
+- le miroir dépoli
+- la BRDF selon Walter
+- la "transparence dépolie"
+- la BSDF (transparence et réflexion) selon Walter (N'est pas parfaite car il semblerait qu'il y ait une perte d'énergie et donc un rendu un peu sombre)
 
 ### Bonus
 
