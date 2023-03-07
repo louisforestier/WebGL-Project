@@ -1,27 +1,22 @@
 body{
-    height: 100%;
+    height: 100vh;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
+    display: flex;
 }
 
 article {
-    float: left;
-    display: flex;
     flex-flow: column;
-    width: 70%;
-    height: 100%;
 }
 
 aside {
-    float: left;
     width: 30%;
     text-align: center;
+    overflow: scroll;
 }
 
 canvas {
-    flex: 1 1 auto;
     width: 100%;
-    height: 100%;
 }
 
 h3{
@@ -30,6 +25,33 @@ h3{
 
 h4{
     text-align: start;
+}
+
+dt{
+    align-items: center;
+}
+
+p{
+    white-space: nowrap;
+}
+
+.squareColorPicker{
+    appearance: none;
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.squareColorPicker::-webkit-color-swatch {
+    border-radius: 10px;
+    border: 2px solid #000000;
+}
+
+.squareColorPicker::-moz-color-swatch {
+    border-radius: 10px;
+    border: 2px solid #000000;
 }
 
 .accordion {
@@ -50,7 +72,7 @@ h4{
 }
 
 .panel {
-    padding: 10px 10px;
+    padding: 10px;
     background-color: white;
     max-height: 0;
     overflow: hidden;
