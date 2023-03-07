@@ -44,6 +44,7 @@ Ajout de l'échantillonnage d'importance, avec de multiples modes :
 - Possibilité de changer la skybox
 - Possibilité de désactiver le plan
 - Possibilité d'avoir un objet réfléchissant une skybox différente que celle de la scène
+- Possibilité pour **Cook & Torrance** d'avoir une lumière statique dans la scène afin d'observer la luminance de l'objet quand la lumière n'est pas face à lui
 - Activation de l'extension permettant de gérer les objets avec des maillages composés de plus de 65535 sommets
 
 ## Problème de buffers
@@ -120,11 +121,14 @@ mesh.indexBuffer.numItems = mesh.indices.length;
 
 - *WebGL-Projet*
   - *objects*
+    - **armadillo.obj** : objet représentant un armadillo, un modèle 3D connu en informatique graphique
     - **bunny.obj** : objet représentant un lapin
     - **duck.obj** : objet représentant un canard
     - **mustang.obj** : objet représentant une Ford Mustang Shelby
     - **porsche.obj** : objet représentant une Porsche
+    - **rhogar.obj** : objet représentant une figurine de jeu de rôle
     - **sphere.obj** : objet représentant une sphère
+    - **xyzrbg_dragon.obj** : objet représentant le modèle connu XYZ dragon
   - *shaders*
     - **cubemap.fs** : fragment shader pour les cubemaps
     - **cubemap.vs** : vertex shader pour les cubemaps
