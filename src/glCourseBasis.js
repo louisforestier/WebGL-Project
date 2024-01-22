@@ -226,7 +226,7 @@ class objmesh {
 		this.refractIndex = 1.52;
 		this.rugosity = 0.1;
 		this.lightIntensity = 1.0;
-		this.shaderState = ShaderState.WalterGGXBRDF;
+		this.shaderState = ShaderState.MiroirDepoli;
 		this.texture = 0;
 		this.color = [0.8,0.4,0.4];
 		this.initAll();
